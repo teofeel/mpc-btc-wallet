@@ -49,6 +49,8 @@ bld/
 
 # VS Code settings (optional: uncomment if team members use VS Code and want shared settings)
 .vscode/
+*.swp
+*.swo
 
 
 appsettings*.local.json
@@ -76,3 +78,10 @@ yarn-error.log*
 *.coverage
 *.coveragexml
 *.dotCover
+
+/dist/
+/.angular/
+
+/src/environments/environment.prod.ts
+/src/environments/environment.ts
+*.env
