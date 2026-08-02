@@ -1,19 +1,25 @@
 {
   "Routes": [
     {
-      "UpstreamPathTemplate": "/wallets/{everything}",
+      "UpstreamPathTemplate": "/api/v1/wallets",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
+      "DownstreamPathTemplate": "/api/v1/wallets",
+      "DownstreamScheme": "http",
+      "ServiceName": "Wallet-Service",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/v1/wallets/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
       "DownstreamPathTemplate": "/api/v1/wallets/{everything}",
       "DownstreamScheme": "http",
       "ServiceName": "Wallet-Service",
       "UseServiceDiscovery": true,
-      "LoadBalancerOptions": {
-        "Type": "RoundRobin"
-      }
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
     }
   ],
   "GlobalConfiguration": {
-    "ServiceDiscoveryProvider": {      "Type": "Eureka"
-    }
+    "ServiceDiscoveryProvider": { "Type": "Eureka" }
   }
 }
