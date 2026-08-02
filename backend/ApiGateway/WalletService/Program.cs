@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Steeltoe.Discovery.Eureka;
 using WalletService.DB;
+using WalletService.DTOs;
 using WalletService.Exceptions;
 using WalletService.Mappers;
+using WalletService.Mappers.Interfaces;
+using WalletService.Models;
 using WalletService.Services;
 using WalletService.Services.Interfaces;
 
@@ -33,6 +36,7 @@ builder.Services.AddMediatR(cfg =>
 
 // Mappers
 builder.Services.AddScoped<CreateWalletMapper>();
+builder.Services.AddScoped<IMapper<WalletAddress, WalletAddressesResponseDTO>, WalletAddressResponseMapper>();
 
 // Domain
 builder.Services.AddScoped<IWalletCreationService, BitcoinWalletCreationService>();

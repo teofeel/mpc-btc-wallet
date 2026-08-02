@@ -15,6 +15,7 @@ namespace WalletService.Mappers
         {
             return new CreateWalletResponseDTO
             {
+                Id = data.Id,
                 Name = data.Name,
                 Network = data.Network
             };

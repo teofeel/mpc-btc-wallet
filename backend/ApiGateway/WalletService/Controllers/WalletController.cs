@@ -1,8 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 using WalletService.Controllers.Interfaces;
 using WalletService.DTOs;
 using WalletService.Features.Commands;
+using WalletService.Features.Queries;
 
 namespace WalletService.Controllers
 {
@@ -17,15 +19,18 @@ namespace WalletService.Controllers
             _logger = logger;
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetWallet()
+        [HttpGet("{id:guid}/addresses")]
+        [ProducesResponseType(typeof(List<WalletAddressesResponseDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetWalletAddresses(Guid id, CancellationToken token)
         {
-            return StatusCode(StatusCodes.Status501NotImplemented);
+            List<WalletAddressesResponseDTO> response = await _mediator.Send(new GetWalletAddressesQuery(id), token);
+            return StatusCode(StatusCodes.Status200OK, response);
         }
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllWallets()
+        public async Task<IActionResult> GetAllAddresses()
         {
             return StatusCode(StatusCodes.Status501NotImplemented);
         }
