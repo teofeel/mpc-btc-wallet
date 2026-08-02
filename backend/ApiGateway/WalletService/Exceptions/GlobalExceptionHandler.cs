@@ -18,6 +18,7 @@ namespace WalletService.Exceptions
             {
                 ArgumentException => (StatusCodes.Status400BadRequest, exception.Message),
                 KeyNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
+                ResourceNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
                 _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred")
             };
 

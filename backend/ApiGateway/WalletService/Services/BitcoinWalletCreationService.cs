@@ -48,7 +48,8 @@ namespace WalletService.Services
                 Network = network.Name,
                 ExtendedPublicKey = pubKey.ToString(network),
                 EncryptedMnemonic = mnemonic.ToString(), // TODO encrypt it
-                DerivationPath = keyPath.ToString()
+                DerivationPath = keyPath.ToString(),
+                Addresses = new List<WalletAddress>()
             };
 
             BitcoinAddress btcAddress = this.DeriveNewAddress(request.Network, wallet.ExtendedPublicKey, wallet.NextReceiveIndex);
@@ -62,6 +63,7 @@ namespace WalletService.Services
             };
 
             wallet.NextReceiveIndex++;
+            wallet.Addresses.Add(address);
 
             await _dbContext.Wallets.AddAsync(wallet);
             await _dbContext.WalletAddresses.AddAsync(address);
