@@ -12,6 +12,7 @@ namespace WalletService.BgServices
     public class MpcJobPoller : BackgroundService
     {
         private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
+        private static readonly TimeSpan PendingStaleAfter = TimeSpan.FromMinutes(5);
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<MpcJobPoller> _logger;
@@ -47,6 +48,22 @@ namespace WalletService.BgServices
             var mpcService = scope.ServiceProvider.GetRequiredService<IWalletMpcService>();
             var queue = scope.ServiceProvider.GetRequiredService<IMpcCompletionQueue>();
 
+            var staleCutoff = DateTime.UtcNow - PendingStaleAfter;
+            var staleWallets = await dbContext.Wallets
+                .Where(w => w.Status == WalletStatus.PENDING_KEY_GEN && w.MpcJobId != null && w.DateCreated < staleCutoff)
+                .ToListAsync(cancellationToken);
+
+            foreach (var staleWallet in staleWallets)
+            {
+                _logger.LogWarning("[Wallet Service] Marking wallet {WalletId} FAILED: pending for over {Minutes} minutes (MPC job lost or wedged)", staleWallet.Id, PendingStaleAfter.TotalMinutes);
+                staleWallet.Status = WalletStatus.FAILED;
+            }
+
+            if (staleWallets.Count > 0)
+            {
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
             var pendingWallets = await dbContext.Wallets
                 .Where(w => w.Status == WalletStatus.PENDING_KEY_GEN && w.MpcJobId != null)
                 .ToListAsync(cancellationToken);
@@ -60,7 +77,7 @@ namespace WalletService.BgServices
                     switch (status.Status)
                     {
                         case GetKeyGenStatusResponse.Types.Status.Completed:
-                            await queue.QueueCompletionAsync(new MpcKeyGenCompletedNotification(wallet.Id, status.PublicKeyHex, status.BitcoinAddress), cancellationToken);
+                            await queue.QueueCompletionAsync(new MpcKeyGenCompletedNotification(wallet.Id, status.Xpub, status.BitcoinAddress), cancellationToken);
                             break;
 
                         case GetKeyGenStatusResponse.Types.Status.Failed:

@@ -59,7 +59,7 @@ func (c *walletMpcServiceClient) GetKeyGenStatus(ctx context.Context, in *GetKey
 	return out, nil
 }
 
-// WalletMpcServiceServer is the handlers API for WalletMpcService service.
+// WalletMpcServiceServer is the server API for WalletMpcService service.
 // All implementations must embed UnimplementedWalletMpcServiceServer
 // for forward compatibility.
 type WalletMpcServiceServer interface {

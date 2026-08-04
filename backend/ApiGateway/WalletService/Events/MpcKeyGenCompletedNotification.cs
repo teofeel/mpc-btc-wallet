@@ -4,7 +4,7 @@ namespace WalletService.Events
 {
     public record MpcKeyGenCompletedNotification(
         Guid WalletId,
-        string PublicKeyHex,
+        string ExtendedPublicKey,
         string Address
     ) : INotification;
 }

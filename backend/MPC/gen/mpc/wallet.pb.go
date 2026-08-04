@@ -228,6 +228,8 @@ type GetKeyGenStatusResponse struct {
 	PublicKeyHex   string                         `protobuf:"bytes,3,opt,name=public_key_hex,json=publicKeyHex,proto3" json:"public_key_hex,omitempty"`
 	BitcoinAddress string                         `protobuf:"bytes,4,opt,name=bitcoin_address,json=bitcoinAddress,proto3" json:"bitcoin_address,omitempty"`
 	ErrorMessage   string                         `protobuf:"bytes,5,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	ChainCodeHex   string                         `protobuf:"bytes,6,opt,name=chain_code_hex,json=chainCodeHex,proto3" json:"chain_code_hex,omitempty"`
+	Xpub           string                         `protobuf:"bytes,7,opt,name=xpub,proto3" json:"xpub,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -297,6 +299,20 @@ func (x *GetKeyGenStatusResponse) GetErrorMessage() string {
 	return ""
 }
 
+func (x *GetKeyGenStatusResponse) GetChainCodeHex() string {
+	if x != nil {
+		return x.ChainCodeHex
+	}
+	return ""
+}
+
+func (x *GetKeyGenStatusResponse) GetXpub() string {
+	if x != nil {
+		return x.Xpub
+	}
+	return ""
+}
+
 var File_proto_wallet_proto protoreflect.FileDescriptor
 
 const file_proto_wallet_proto_rawDesc = "" +
@@ -309,13 +325,15 @@ const file_proto_wallet_proto_rawDesc = "" +
 	"\x13StartKeyGenResponse\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"/\n" +
 	"\x16GetKeyGenStatusRequest\x12\x15\n" +
-	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"\xb5\x02\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"\xef\x02\n" +
 	"\x17GetKeyGenStatusResponse\x12;\n" +
 	"\x06status\x18\x01 \x01(\x0e2#.mpc.GetKeyGenStatusResponse.StatusR\x06status\x12\x1b\n" +
 	"\twallet_id\x18\x02 \x01(\tR\bwalletId\x12$\n" +
 	"\x0epublic_key_hex\x18\x03 \x01(\tR\fpublicKeyHex\x12'\n" +
 	"\x0fbitcoin_address\x18\x04 \x01(\tR\x0ebitcoinAddress\x12#\n" +
-	"\rerror_message\x18\x05 \x01(\tR\ferrorMessage\"L\n" +
+	"\rerror_message\x18\x05 \x01(\tR\ferrorMessage\x12$\n" +
+	"\x0echain_code_hex\x18\x06 \x01(\tR\fchainCodeHex\x12\x12\n" +
+	"\x04xpub\x18\a \x01(\tR\x04xpub\"L\n" +
 	"\x06Status\x12\x16\n" +
 	"\x12STATUS_UNSPECIFIED\x10\x00\x12\x0f\n" +
 	"\vIN_PROGRESS\x10\x01\x12\r\n" +

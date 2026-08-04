@@ -17,7 +17,7 @@ namespace WalletService.Features.Handlers
         {
             await _walletCreationService.CompleteWalletSetupAsync(
                 notification.WalletId,
-                notification.PublicKeyHex,
+                notification.ExtendedPublicKey,
                 notification.Address,
                 cancellationToken
             );
