@@ -6,10 +6,8 @@ namespace WalletService.Services.Interfaces
 {
     public interface IWalletCreationService
     {
-        Task<CreateWalletResponseDTO> GenerateWalletAsync(CreateWalletRequestDTO request);
-
+        Task<StartWalletCreationResponseDTO> GenerateWalletAsync(CreateWalletRequestDTO request, CancellationToken ct);
+        Task<CreateWalletResponseDTO> CompleteWalletSetupAsync(Guid walletId, string extendedPublicKey, string address, CancellationToken ct = default);
         BitcoinAddress DeriveNewAddress(string networkType, string extPublicKey, int NextReceiveIndex, bool isChange);
-
-        Mnemonic GenerateMnemonic(Wordlist wordlist, WordCount count);
     }
 }

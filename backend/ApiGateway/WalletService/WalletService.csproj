@@ -20,6 +20,8 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
     <PackageReference Include="Steeltoe.Discovery.Eureka" Version="4.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.80.0" />
+    <Protobuf Include="..\..\MPC\proto\wallet.proto" Link="Protos/wallet.proto" GrpcServices="Both" />
   </ItemGroup>
 
 </Project>

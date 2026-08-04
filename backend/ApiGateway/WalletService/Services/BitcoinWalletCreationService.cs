@@ -12,11 +12,16 @@ namespace WalletService.Services
     {
         private readonly WalletDbContext _dbContext;
         private readonly CreateWalletMapper _createWalletMapper;
+        private readonly StartWalletCreationMapper _startWalletCreationMapper;
+        private readonly IWalletMpcService _walletMpcService;
 
-        public BitcoinWalletCreationService(WalletDbContext dbContext, CreateWalletMapper createWalletMapper)
+        public BitcoinWalletCreationService(WalletDbContext dbContext, StartWalletCreationMapper startWalletCreationMapper, 
+            CreateWalletMapper createWalletMapper, IWalletMpcService walletMpcService)
         {
             _dbContext = dbContext;
+            _startWalletCreationMapper = startWalletCreationMapper;
             _createWalletMapper = createWalletMapper;
+            _walletMpcService = walletMpcService;
         }
 
         private Network GetNetwork(string network)
@@ -30,34 +35,45 @@ namespace WalletService.Services
             };
         }
 
-        public async Task<CreateWalletResponseDTO> GenerateWalletAsync(CreateWalletRequestDTO request)
+        public async Task<StartWalletCreationResponseDTO> GenerateWalletAsync(CreateWalletRequestDTO request, CancellationToken ct)
         {
             Network network = GetNetwork(request.Network);
             string coinType = network == Network.Main ? "0'" : "1'";
-
-            Mnemonic mnemonic = GenerateMnemonic(Wordlist.English, WordCount.Twelve);
-            ExtKey masterKey = mnemonic.DeriveExtKey();
-
             KeyPath keyPath = new KeyPath($"m/84'/{coinType}/0'");
-            ExtPubKey pubKey = masterKey.Derive(keyPath).Neuter();
 
-            // mnemonic should be stored encrypted 
             Wallet wallet = new Wallet
             {
+                Id = Guid.NewGuid(),
                 Name = request.Name,
                 Network = network.Name,
-                ExtendedPublicKey = pubKey.ToString(network),
-                EncryptedMnemonic = mnemonic.ToString(), // TODO encrypt it
                 DerivationPath = keyPath.ToString(),
+                Status = Models.Enums.WalletStatus.PENDING_KEY_GEN,
                 Addresses = new List<WalletAddress>()
             };
 
-            BitcoinAddress btcAddress = this.DeriveNewAddress(request.Network, wallet.ExtendedPublicKey, wallet.NextReceiveIndex);
+            string idempotencyKey = Guid.NewGuid().ToString();
+            string jobId = await _walletMpcService.StartKeyGenerationAsync(wallet.Id.ToString(), idempotencyKey, request.Network, ct);
 
-            WalletAddress address = new WalletAddress
+            wallet.MpcJobId = jobId;
+
+
+            await _dbContext.Wallets.AddAsync(wallet);
+            await _dbContext.SaveChangesAsync();
+
+            return _startWalletCreationMapper.ToDto(wallet);
+        }
+
+        public async Task<CreateWalletResponseDTO> CompleteWalletSetupAsync(Guid walletId, string extendedPublicKey, string derivedAddress, CancellationToken ct = default)
+        {
+            var wallet = await _dbContext.Wallets.FindAsync(new object[] { walletId }, ct) ?? throw new KeyNotFoundException($"[Wallet Service] Wallet {walletId} not found");
+
+            wallet.ExtendedPublicKey = extendedPublicKey;
+            wallet.Status = Models.Enums.WalletStatus.ACTIVE;
+
+            var address = new WalletAddress
             {
                 Wallet = wallet,
-                Address = btcAddress.ToString(),
+                Address = derivedAddress,
                 AddressIndex = wallet.NextReceiveIndex,
                 IsChange = false
             };
@@ -65,14 +81,10 @@ namespace WalletService.Services
             wallet.NextReceiveIndex++;
             wallet.Addresses.Add(address);
 
-            await _dbContext.Wallets.AddAsync(wallet);
             await _dbContext.WalletAddresses.AddAsync(address);
             await _dbContext.SaveChangesAsync();
 
-            CreateWalletResponseDTO response = _createWalletMapper.ToDto(wallet);
-            response.Address = address.Address;
-
-            return response;
+            return _createWalletMapper.ToDto(wallet);
         }
 
         public BitcoinAddress DeriveNewAddress(string networkType, string extPublicKey, int nextReceiveIndex, bool isChange = false)
@@ -90,11 +102,6 @@ namespace WalletService.Services
                 .GetAddress(ScriptPubKeyType.Segwit, network);
 
             return receiveAddress;
-        }
-
-        public Mnemonic GenerateMnemonic(Wordlist wordlist, WordCount count)
-        {
-            return new Mnemonic(wordlist, count);
         }
 
     }

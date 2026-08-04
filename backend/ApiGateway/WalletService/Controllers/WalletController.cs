@@ -37,7 +37,7 @@ namespace WalletService.Controllers
 
 
         [HttpPost]
-        [ProducesResponseType(typeof(CreateWalletResponseDTO), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(StartWalletCreationResponseDTO), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateWallet([FromBody] CreateWalletRequestDTO request)
@@ -50,7 +50,7 @@ namespace WalletService.Controllers
             _logger.LogInformation("[Wallet Service] Received HTTP POST request to create wallet: {Name} on network: {Network}", request.Name, request.Network);
 
             CreateWalletCommand command = new CreateWalletCommand(request);
-            CreateWalletResponseDTO response = await _mediator.Send(command);
+            StartWalletCreationResponseDTO response = await _mediator.Send(command);
 
             return StatusCode(StatusCodes.Status201Created, response);
         }

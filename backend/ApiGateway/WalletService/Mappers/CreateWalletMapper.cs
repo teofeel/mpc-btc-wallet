@@ -17,7 +17,9 @@ namespace WalletService.Mappers
             {
                 Id = data.Id,
                 Name = data.Name,
-                Network = data.Network
+                Network = data.Network,
+                Status = data.Status,
+                JobId = data.MpcJobId
             };
         }
     }
