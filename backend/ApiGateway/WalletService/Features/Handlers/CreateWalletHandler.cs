@@ -8,7 +8,7 @@ using WalletService.Services.Interfaces;
 
 namespace WalletService.Features.Handlers
 {
-    public class CreateWalletHandler : IRequestHandler<CreateWalletCommand, CreateWalletResponseDTO>
+    public class CreateWalletHandler : IRequestHandler<CreateWalletCommand, StartWalletCreationResponseDTO>
     {
         private readonly IWalletCreationService _walletCreationService;
         private readonly ILogger<CreateWalletHandler> _logger;
@@ -19,10 +19,10 @@ namespace WalletService.Features.Handlers
             _logger = logger;
         }
 
-        public async Task<CreateWalletResponseDTO> Handle(CreateWalletCommand command, CancellationToken token)
+        public async Task<StartWalletCreationResponseDTO> Handle(CreateWalletCommand command, CancellationToken token)
         {
             _logger.LogInformation("[Wallet Service] Creating new wallet....");
-            return await _walletCreationService.GenerateWalletAsync(command.request);
+            return await _walletCreationService.GenerateWalletAsync(command.request, token);
         }
     }
 }

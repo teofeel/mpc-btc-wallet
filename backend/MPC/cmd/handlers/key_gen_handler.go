@@ -1,4 +1,4 @@
-package server
+package handlers
 
 import (
 	"context"
@@ -14,10 +14,12 @@ import (
 	"mpc/pkg/dkg"
 	"mpc/pkg/network"
 	"strings"
+	"sync"
 	"time"
 )
 
 type MpcServer struct {
+	pb.UnimplementedWalletMpcServiceServer
 	jobManager *dkg.JobManager
 	router     network.Router
 }
@@ -60,15 +62,48 @@ func checkErrors(ctx context.Context, req *pb.StartKeyGenRequest) error {
 	return nil
 }
 
+func generateParams(idx int, preParamsList []*keygen.LocalPreParams, wg *sync.WaitGroup, errs chan<- error) {
+	defer wg.Done()
+	pp, err := keygen.GeneratePreParams(2 * time.Minute)
+
+	if err != nil {
+		errs <- fmt.Errorf("party %d: %w", idx, err)
+		return
+	}
+	preParamsList[idx] = pp
+}
+
+func (s *MpcServer) generatePreParamsList(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
+	preParamsList := make([]*keygen.LocalPreParams, len(sortedIds))
+
+	var wg sync.WaitGroup
+	errs := make(chan error, len(sortedIds))
+
+	for i := range preParamsList {
+		wg.Add(1)
+		go generateParams(i, preParamsList, &wg, errs)
+	}
+
+	wg.Wait()
+	close(errs)
+
+	if err := <-errs; err != nil {
+		s.jobManager.FailJob(jobID, "failed to generate pre-params: "+err.Error())
+		return nil
+	}
+
+	return preParamsList
+}
+
 func (s *MpcServer) executeKeyGen(jobID, walletID string, netParams *chaincfg.Params) {
 	pID1 := tss.NewPartyID("1", "Node-1", big.NewInt(10))
 	pID2 := tss.NewPartyID("2", "Node-2", big.NewInt(20))
 	pID3 := tss.NewPartyID("3", "Node-3", big.NewInt(30))
 
-	sortedIds := tss.SortedPartyIDs{pID1, pID2, pID3}
-	preParams, err := keygen.GeneratePreParams(2 * time.Minute)
-	if err != nil {
-		s.jobManager.FailJob(jobID, "failed to generate pre-params: "+err.Error())
+	sortedIds := tss.SortPartyIDs([]*tss.PartyID{pID1, pID2, pID3})
+
+	preParamsList := s.generatePreParamsList(sortedIds, walletID)
+	if preParamsList == nil {
 		return
 	}
 
@@ -79,7 +114,7 @@ func (s *MpcServer) executeKeyGen(jobID, walletID string, netParams *chaincfg.Pa
 		1,
 		s.router,
 		netParams,
-		preParams,
+		preParamsList,
 		2 * time.Minute,
 	}
 
@@ -113,4 +148,23 @@ func (s *MpcServer) StartKeyGen(ctx context.Context, req *pb.StartKeyGenRequest)
 	go s.executeKeyGen(jobID, req.WalletId, netParams)
 
 	return &pb.StartKeyGenResponse{JobId: jobID}, nil
+}
+
+func (s *MpcServer) GetKeyGenStatus(ctx context.Context, req *pb.GetKeyGenStatusRequest) (*pb.GetKeyGenStatusResponse, error) {
+	if req.JobId == "" {
+		return nil, status.Error(codes.InvalidArgument, "jobId is required")
+	}
+
+	job, found := s.jobManager.GetJob(req.JobId)
+	if !found {
+		return nil, status.Error(codes.NotFound, "job not found")
+	}
+
+	return &pb.GetKeyGenStatusResponse{
+		Status:         job.Status,
+		WalletId:       job.WalletID,
+		PublicKeyHex:   job.PublicKeyHex,
+		BitcoinAddress: job.BitcoinAddress,
+		ErrorMessage:   job.ErrMsg,
+	}, nil
 }

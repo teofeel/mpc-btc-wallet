@@ -22,7 +22,7 @@ type KeyGenConfig struct {
 	Router      network.Router
 	Network     *chaincfg.Params
 
-	PreParams *keygen.LocalPreParams
+	PreParams []*keygen.LocalPreParams
 	Timeout   time.Duration
 }
 
@@ -35,10 +35,10 @@ type KeyGenResult struct {
 
 func checkErrors(ctx context.Context, cfg KeyGenConfig) error {
 	if cfg.Threshold >= len(cfg.AllPartyIDs) {
-		return fmt.Errorf("Threshold %d must be less than party cound &d", cfg.Threshold, len(cfg.AllPartyIDs))
+		return fmt.Errorf("Threshold %d must be less than party cound %d", cfg.Threshold, len(cfg.AllPartyIDs))
 	}
-	if cfg.PreParams == nil {
-		return fmt.Errorf("Key gen for %s: no pre generated params", cfg.WalletID)
+	if len(cfg.PreParams) != len(cfg.AllPartyIDs) {
+		return fmt.Errorf("Key gen for %s: pre-params must be generated per party", cfg.WalletID)
 	}
 
 	return nil
@@ -58,42 +58,22 @@ func RunKeyGen(ctx context.Context, cfg KeyGenConfig) (*KeyGenResult, error) {
 	defer cancel()
 
 	peerCtx := tss.NewPeerContext(cfg.AllPartyIDs)
-	params := tss.NewParameters(tss.S256(), peerCtx, cfg.PartyID, len(cfg.AllPartyIDs), cfg.Threshold)
 
-	outCh := make(chan tss.Message, len(cfg.AllPartyIDs))
-	endCh := make(chan *keygen.LocalPartySaveData, 1)
-	errCh := make(chan *tss.Error, 1)
+	outCh := make(chan tss.Message, len(cfg.AllPartyIDs)*4)
+	endCh := make(chan *keygen.LocalPartySaveData, len(cfg.AllPartyIDs))
+	errCh := make(chan *tss.Error, len(cfg.AllPartyIDs))
 
-	party := keygen.NewLocalParty(params, outCh, endCh, *cfg.PreParams)
+	parties := generateAndRegisterParties(cfg, peerCtx, outCh, endCh, errCh)
 
-	cfg.Router.Register(cfg.PartyID.Id, party, func(err *tss.Error) {
-		select {
-		case errCh <- err:
-		default:
-		}
-	})
-
-	defer cfg.Router.Unregister(cfg.PartyID.Id)
-
-	go func() {
-		if err := party.Start(); err != nil {
-			select {
-			case errCh <- err:
-			default:
-			}
+	defer func() {
+		for _, partyID := range cfg.AllPartyIDs {
+			cfg.Router.Unregister(partyID.Id)
 		}
 	}()
 
-	go func() {
-		for {
-			select {
-			case msg := <-outCh:
-				cfg.Router.Route(msg, cfg.PartyID)
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
+	go handleMessage(ctx, cfg, outCh)
+
+	startParties(parties, errCh)
 
 	select {
 	case saveData := <-endCh:
@@ -102,6 +82,51 @@ func RunKeyGen(ctx context.Context, cfg KeyGenConfig) (*KeyGenResult, error) {
 		return nil, fmt.Errorf("%w", tssErr)
 	case <-ctx.Done():
 		return nil, fmt.Errorf("%w", ctx.Err())
+	}
+}
+
+func generateAndRegisterParties(cfg KeyGenConfig, peerCtx *tss.PeerContext,
+	outCh chan tss.Message, endCh chan *keygen.LocalPartySaveData, errCh chan *tss.Error) []tss.Party {
+
+	parties := make([]tss.Party, 0, len(cfg.AllPartyIDs))
+	for i, partyID := range cfg.AllPartyIDs {
+		params := tss.NewParameters(tss.S256(), peerCtx, partyID, len(cfg.AllPartyIDs), cfg.Threshold)
+		party := keygen.NewLocalParty(params, outCh, endCh, *cfg.PreParams[i])
+
+		parties = append(parties, party)
+
+		cfg.Router.Register(partyID.Id, party, func(err *tss.Error) {
+			select {
+			case errCh <- err:
+			default:
+			}
+		})
+	}
+
+	return parties
+}
+
+func handleMessage(ctx context.Context, cfg KeyGenConfig, outCh chan tss.Message) {
+	for {
+		select {
+		case msg := <-outCh:
+			cfg.Router.Route(msg, msg.GetFrom())
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func startParties(parties []tss.Party, errCh chan *tss.Error) {
+	for _, party := range parties {
+		go func(p tss.Party) {
+			if err := p.Start(); err != nil {
+				select {
+				case errCh <- err:
+				default:
+				}
+			}
+		}(party)
 	}
 }
 

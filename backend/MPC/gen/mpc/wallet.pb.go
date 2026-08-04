@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v7.35.1
-// source: proto/mpc.proto
+// source: proto/wallet.proto
 
 package mpc
 
@@ -57,11 +57,11 @@ func (x GetKeyGenStatusResponse_Status) String() string {
 }
 
 func (GetKeyGenStatusResponse_Status) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_mpc_proto_enumTypes[0].Descriptor()
+	return file_proto_wallet_proto_enumTypes[0].Descriptor()
 }
 
 func (GetKeyGenStatusResponse_Status) Type() protoreflect.EnumType {
-	return &file_proto_mpc_proto_enumTypes[0]
+	return &file_proto_wallet_proto_enumTypes[0]
 }
 
 func (x GetKeyGenStatusResponse_Status) Number() protoreflect.EnumNumber {
@@ -70,7 +70,7 @@ func (x GetKeyGenStatusResponse_Status) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use GetKeyGenStatusResponse_Status.Descriptor instead.
 func (GetKeyGenStatusResponse_Status) EnumDescriptor() ([]byte, []int) {
-	return file_proto_mpc_proto_rawDescGZIP(), []int{3, 0}
+	return file_proto_wallet_proto_rawDescGZIP(), []int{3, 0}
 }
 
 type StartKeyGenRequest struct {
@@ -84,7 +84,7 @@ type StartKeyGenRequest struct {
 
 func (x *StartKeyGenRequest) Reset() {
 	*x = StartKeyGenRequest{}
-	mi := &file_proto_mpc_proto_msgTypes[0]
+	mi := &file_proto_wallet_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -96,7 +96,7 @@ func (x *StartKeyGenRequest) String() string {
 func (*StartKeyGenRequest) ProtoMessage() {}
 
 func (x *StartKeyGenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_mpc_proto_msgTypes[0]
+	mi := &file_proto_wallet_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -109,7 +109,7 @@ func (x *StartKeyGenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartKeyGenRequest.ProtoReflect.Descriptor instead.
 func (*StartKeyGenRequest) Descriptor() ([]byte, []int) {
-	return file_proto_mpc_proto_rawDescGZIP(), []int{0}
+	return file_proto_wallet_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *StartKeyGenRequest) GetWalletId() string {
@@ -142,7 +142,7 @@ type StartKeyGenResponse struct {
 
 func (x *StartKeyGenResponse) Reset() {
 	*x = StartKeyGenResponse{}
-	mi := &file_proto_mpc_proto_msgTypes[1]
+	mi := &file_proto_wallet_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -154,7 +154,7 @@ func (x *StartKeyGenResponse) String() string {
 func (*StartKeyGenResponse) ProtoMessage() {}
 
 func (x *StartKeyGenResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_mpc_proto_msgTypes[1]
+	mi := &file_proto_wallet_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -167,7 +167,7 @@ func (x *StartKeyGenResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartKeyGenResponse.ProtoReflect.Descriptor instead.
 func (*StartKeyGenResponse) Descriptor() ([]byte, []int) {
-	return file_proto_mpc_proto_rawDescGZIP(), []int{1}
+	return file_proto_wallet_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *StartKeyGenResponse) GetJobId() string {
@@ -186,7 +186,7 @@ type GetKeyGenStatusRequest struct {
 
 func (x *GetKeyGenStatusRequest) Reset() {
 	*x = GetKeyGenStatusRequest{}
-	mi := &file_proto_mpc_proto_msgTypes[2]
+	mi := &file_proto_wallet_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -198,7 +198,7 @@ func (x *GetKeyGenStatusRequest) String() string {
 func (*GetKeyGenStatusRequest) ProtoMessage() {}
 
 func (x *GetKeyGenStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_mpc_proto_msgTypes[2]
+	mi := &file_proto_wallet_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -211,7 +211,7 @@ func (x *GetKeyGenStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetKeyGenStatusRequest.ProtoReflect.Descriptor instead.
 func (*GetKeyGenStatusRequest) Descriptor() ([]byte, []int) {
-	return file_proto_mpc_proto_rawDescGZIP(), []int{2}
+	return file_proto_wallet_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetKeyGenStatusRequest) GetJobId() string {
@@ -234,7 +234,7 @@ type GetKeyGenStatusResponse struct {
 
 func (x *GetKeyGenStatusResponse) Reset() {
 	*x = GetKeyGenStatusResponse{}
-	mi := &file_proto_mpc_proto_msgTypes[3]
+	mi := &file_proto_wallet_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -246,7 +246,7 @@ func (x *GetKeyGenStatusResponse) String() string {
 func (*GetKeyGenStatusResponse) ProtoMessage() {}
 
 func (x *GetKeyGenStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_mpc_proto_msgTypes[3]
+	mi := &file_proto_wallet_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -259,7 +259,7 @@ func (x *GetKeyGenStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetKeyGenStatusResponse.ProtoReflect.Descriptor instead.
 func (*GetKeyGenStatusResponse) Descriptor() ([]byte, []int) {
-	return file_proto_mpc_proto_rawDescGZIP(), []int{3}
+	return file_proto_wallet_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetKeyGenStatusResponse) GetStatus() GetKeyGenStatusResponse_Status {
@@ -297,139 +297,11 @@ func (x *GetKeyGenStatusResponse) GetErrorMessage() string {
 	return ""
 }
 
-type SignRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	WalletId       string                 `protobuf:"bytes,1,opt,name=wallet_id,json=walletId,proto3" json:"wallet_id,omitempty"`
-	TxHash         []byte                 `protobuf:"bytes,2,opt,name=tx_hash,json=txHash,proto3" json:"tx_hash,omitempty"`
-	DerivationPath string                 `protobuf:"bytes,3,opt,name=derivation_path,json=derivationPath,proto3" json:"derivation_path,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
+var File_proto_wallet_proto protoreflect.FileDescriptor
 
-func (x *SignRequest) Reset() {
-	*x = SignRequest{}
-	mi := &file_proto_mpc_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SignRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SignRequest) ProtoMessage() {}
-
-func (x *SignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_mpc_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SignRequest.ProtoReflect.Descriptor instead.
-func (*SignRequest) Descriptor() ([]byte, []int) {
-	return file_proto_mpc_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *SignRequest) GetWalletId() string {
-	if x != nil {
-		return x.WalletId
-	}
-	return ""
-}
-
-func (x *SignRequest) GetTxHash() []byte {
-	if x != nil {
-		return x.TxHash
-	}
-	return nil
-}
-
-func (x *SignRequest) GetDerivationPath() string {
-	if x != nil {
-		return x.DerivationPath
-	}
-	return ""
-}
-
-type SignResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	WalletId      string                 `protobuf:"bytes,1,opt,name=wallet_id,json=walletId,proto3" json:"wallet_id,omitempty"`
-	R             []byte                 `protobuf:"bytes,2,opt,name=r,proto3" json:"r,omitempty"` // ECDSA R component, 32 bytes
-	S             []byte                 `protobuf:"bytes,3,opt,name=s,proto3" json:"s,omitempty"` // ECDSA S component, 32 bytes
-	RecoveryId    int32                  `protobuf:"varint,4,opt,name=recovery_id,json=recoveryId,proto3" json:"recovery_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SignResponse) Reset() {
-	*x = SignResponse{}
-	mi := &file_proto_mpc_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SignResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SignResponse) ProtoMessage() {}
-
-func (x *SignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_mpc_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SignResponse.ProtoReflect.Descriptor instead.
-func (*SignResponse) Descriptor() ([]byte, []int) {
-	return file_proto_mpc_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *SignResponse) GetWalletId() string {
-	if x != nil {
-		return x.WalletId
-	}
-	return ""
-}
-
-func (x *SignResponse) GetR() []byte {
-	if x != nil {
-		return x.R
-	}
-	return nil
-}
-
-func (x *SignResponse) GetS() []byte {
-	if x != nil {
-		return x.S
-	}
-	return nil
-}
-
-func (x *SignResponse) GetRecoveryId() int32 {
-	if x != nil {
-		return x.RecoveryId
-	}
-	return 0
-}
-
-var File_proto_mpc_proto protoreflect.FileDescriptor
-
-const file_proto_mpc_proto_rawDesc = "" +
+const file_proto_wallet_proto_rawDesc = "" +
 	"\n" +
-	"\x0fproto/mpc.proto\x12\x03mpc\"t\n" +
+	"\x12proto/wallet.proto\x12\x03mpc\"t\n" +
 	"\x12StartKeyGenRequest\x12\x1b\n" +
 	"\twallet_id\x18\x01 \x01(\tR\bwalletId\x12'\n" +
 	"\x0fidempotency_key\x18\x02 \x01(\tR\x0eidempotencyKey\x12\x18\n" +
@@ -449,82 +321,66 @@ const file_proto_mpc_proto_rawDesc = "" +
 	"\vIN_PROGRESS\x10\x01\x12\r\n" +
 	"\tCOMPLETED\x10\x02\x12\n" +
 	"\n" +
-	"\x06FAILED\x10\x03\"l\n" +
-	"\vSignRequest\x12\x1b\n" +
-	"\twallet_id\x18\x01 \x01(\tR\bwalletId\x12\x17\n" +
-	"\atx_hash\x18\x02 \x01(\fR\x06txHash\x12'\n" +
-	"\x0fderivation_path\x18\x03 \x01(\tR\x0ederivationPath\"h\n" +
-	"\fSignResponse\x12\x1b\n" +
-	"\twallet_id\x18\x01 \x01(\tR\bwalletId\x12\f\n" +
-	"\x01r\x18\x02 \x01(\fR\x01r\x12\f\n" +
-	"\x01s\x18\x03 \x01(\fR\x01s\x12\x1f\n" +
-	"\vrecovery_id\x18\x04 \x01(\x05R\n" +
-	"recoveryId2\xc9\x01\n" +
-	"\n" +
-	"MpcService\x12@\n" +
+	"\x06FAILED\x10\x032\xa2\x01\n" +
+	"\x10WalletMpcService\x12@\n" +
 	"\vStartKeyGen\x12\x17.mpc.StartKeyGenRequest\x1a\x18.mpc.StartKeyGenResponse\x12L\n" +
-	"\x0fGetKeyGenStatus\x12\x1b.mpc.GetKeyGenStatusRequest\x1a\x1c.mpc.GetKeyGenStatusResponse\x12+\n" +
-	"\x04Sign\x12\x10.mpc.SignRequest\x1a\x11.mpc.SignResponseB-Z\agen/mpc\xaa\x02!WalletService.Services.MpcServiceb\x06proto3"
+	"\x0fGetKeyGenStatus\x12\x1b.mpc.GetKeyGenStatusRequest\x1a\x1c.mpc.GetKeyGenStatusResponseB-Z\agen/mpc\xaa\x02!WalletService.Services.MpcServiceb\x06proto3"
 
 var (
-	file_proto_mpc_proto_rawDescOnce sync.Once
-	file_proto_mpc_proto_rawDescData []byte
+	file_proto_wallet_proto_rawDescOnce sync.Once
+	file_proto_wallet_proto_rawDescData []byte
 )
 
-func file_proto_mpc_proto_rawDescGZIP() []byte {
-	file_proto_mpc_proto_rawDescOnce.Do(func() {
-		file_proto_mpc_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_mpc_proto_rawDesc), len(file_proto_mpc_proto_rawDesc)))
+func file_proto_wallet_proto_rawDescGZIP() []byte {
+	file_proto_wallet_proto_rawDescOnce.Do(func() {
+		file_proto_wallet_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_wallet_proto_rawDesc), len(file_proto_wallet_proto_rawDesc)))
 	})
-	return file_proto_mpc_proto_rawDescData
+	return file_proto_wallet_proto_rawDescData
 }
 
-var file_proto_mpc_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_mpc_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
-var file_proto_mpc_proto_goTypes = []any{
+var file_proto_wallet_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_proto_wallet_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_wallet_proto_goTypes = []any{
 	(GetKeyGenStatusResponse_Status)(0), // 0: mpc.GetKeyGenStatusResponse.Status
 	(*StartKeyGenRequest)(nil),          // 1: mpc.StartKeyGenRequest
 	(*StartKeyGenResponse)(nil),         // 2: mpc.StartKeyGenResponse
 	(*GetKeyGenStatusRequest)(nil),      // 3: mpc.GetKeyGenStatusRequest
 	(*GetKeyGenStatusResponse)(nil),     // 4: mpc.GetKeyGenStatusResponse
-	(*SignRequest)(nil),                 // 5: mpc.SignRequest
-	(*SignResponse)(nil),                // 6: mpc.SignResponse
 }
-var file_proto_mpc_proto_depIdxs = []int32{
+var file_proto_wallet_proto_depIdxs = []int32{
 	0, // 0: mpc.GetKeyGenStatusResponse.status:type_name -> mpc.GetKeyGenStatusResponse.Status
-	1, // 1: mpc.MpcService.StartKeyGen:input_type -> mpc.StartKeyGenRequest
-	3, // 2: mpc.MpcService.GetKeyGenStatus:input_type -> mpc.GetKeyGenStatusRequest
-	5, // 3: mpc.MpcService.Sign:input_type -> mpc.SignRequest
-	2, // 4: mpc.MpcService.StartKeyGen:output_type -> mpc.StartKeyGenResponse
-	4, // 5: mpc.MpcService.GetKeyGenStatus:output_type -> mpc.GetKeyGenStatusResponse
-	6, // 6: mpc.MpcService.Sign:output_type -> mpc.SignResponse
-	4, // [4:7] is the sub-list for method output_type
-	1, // [1:4] is the sub-list for method input_type
+	1, // 1: mpc.WalletMpcService.StartKeyGen:input_type -> mpc.StartKeyGenRequest
+	3, // 2: mpc.WalletMpcService.GetKeyGenStatus:input_type -> mpc.GetKeyGenStatusRequest
+	2, // 3: mpc.WalletMpcService.StartKeyGen:output_type -> mpc.StartKeyGenResponse
+	4, // 4: mpc.WalletMpcService.GetKeyGenStatus:output_type -> mpc.GetKeyGenStatusResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_proto_mpc_proto_init() }
-func file_proto_mpc_proto_init() {
-	if File_proto_mpc_proto != nil {
+func init() { file_proto_wallet_proto_init() }
+func file_proto_wallet_proto_init() {
+	if File_proto_wallet_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_mpc_proto_rawDesc), len(file_proto_mpc_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_wallet_proto_rawDesc), len(file_proto_wallet_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   6,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_mpc_proto_goTypes,
-		DependencyIndexes: file_proto_mpc_proto_depIdxs,
-		EnumInfos:         file_proto_mpc_proto_enumTypes,
-		MessageInfos:      file_proto_mpc_proto_msgTypes,
+		GoTypes:           file_proto_wallet_proto_goTypes,
+		DependencyIndexes: file_proto_wallet_proto_depIdxs,
+		EnumInfos:         file_proto_wallet_proto_enumTypes,
+		MessageInfos:      file_proto_wallet_proto_msgTypes,
 	}.Build()
-	File_proto_mpc_proto = out.File
-	file_proto_mpc_proto_goTypes = nil
-	file_proto_mpc_proto_depIdxs = nil
+	File_proto_wallet_proto = out.File
+	file_proto_wallet_proto_goTypes = nil
+	file_proto_wallet_proto_depIdxs = nil
 }

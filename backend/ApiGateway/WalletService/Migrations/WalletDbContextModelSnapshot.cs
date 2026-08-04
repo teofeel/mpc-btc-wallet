@@ -35,11 +35,11 @@ namespace WalletService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("EncryptedMnemonic")
-                        .HasColumnType("text");
-
                     b.Property<string>("ExtendedPublicKey")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MpcJobId")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
@@ -58,6 +58,9 @@ namespace WalletService.Migrations
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

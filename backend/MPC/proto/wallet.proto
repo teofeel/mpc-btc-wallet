@@ -5,10 +5,10 @@ package mpc;
 option go_package = "gen/mpc";
 option csharp_namespace = "WalletService.Services.MpcService";
 
-service MpcService {
+service WalletMpcService {
   rpc StartKeyGen (StartKeyGenRequest) returns (StartKeyGenResponse);
   rpc GetKeyGenStatus (GetKeyGenStatusRequest) returns (GetKeyGenStatusResponse);
-  rpc Sign (SignRequest) returns (SignResponse);
+  //rpc Sign (SignRequest) returns (SignResponse);
 }
 
 message StartKeyGenRequest {
@@ -40,7 +40,7 @@ message GetKeyGenStatusResponse{
   string error_message = 5;
 }
 
-message SignRequest {
+/*message SignRequest {
   string wallet_id = 1;
   bytes tx_hash = 2;
   string derivation_path = 3;
@@ -51,5 +51,5 @@ message SignResponse {
   bytes r = 2; // ECDSA R component, 32 bytes
   bytes s = 3; // ECDSA S component, 32 bytes
   int32 recovery_id = 4;
-}
+}*/
 
