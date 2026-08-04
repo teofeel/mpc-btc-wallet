@@ -4,12 +4,15 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"github.com/bnb-chain/tss-lib/v2/ecdsa/keygen"
 	"github.com/bnb-chain/tss-lib/v2/tss"
 	"github.com/btcsuite/btcd/btcutil"
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
+	"math/big"
 	"mpc/pkg/network"
 	"time"
 )
@@ -29,6 +32,8 @@ type KeyGenConfig struct {
 type KeyGenResult struct {
 	WalletId       string
 	PublicKeyHex   string
+	ChainCodeHex   string
+	XPub           string
 	BitcoinAddress string
 	SaveData       *keygen.LocalPartySaveData
 }
@@ -149,12 +154,50 @@ func buildResult(walletID string, saveData *keygen.LocalPartySaveData, netParams
 		return nil, fmt.Errorf("wallet %s failed to derive address %w", walletID, err)
 	}
 
+	xPub, chainCode, err := buildXPubFromTss(saveData, netParams)
+	if err != nil {
+		return nil, err
+	}
+
 	return &KeyGenResult{
 		WalletId:       walletID,
 		PublicKeyHex:   hex.EncodeToString(compressedPubKey),
 		BitcoinAddress: address,
+		ChainCodeHex:   chainCode,
+		XPub:           xPub,
 		SaveData:       saveData,
 	}, nil
+}
+
+func buildXPubFromTss(saveData *keygen.LocalPartySaveData, netParams *chaincfg.Params) (string, string, error) {
+	pkX := saveData.ECDSAPub.X()
+	pkY := saveData.ECDSAPub.Y()
+
+	pubKeyBytes := make([]byte, 33)
+	if new(big.Int).And(pkY, big.NewInt(1)).Int64() == 0 {
+		pubKeyBytes[0] = 0x02
+	} else {
+		pubKeyBytes[0] = 0x03
+	}
+
+	xBytes := pkX.Bytes()
+	copy(pubKeyBytes[33-len(xBytes):], xBytes)
+
+	h := sha256.New()
+	h.Write(pubKeyBytes)
+	chainCode := h.Sum(nil)
+
+	xPub := hdkeychain.NewExtendedKey(
+		netParams.HDPublicKeyID[:],
+		pubKeyBytes,
+		chainCode,
+		[]byte{0x00, 0x00, 0x00, 0x00},
+		0,
+		0,
+		false,
+	)
+
+	return xPub.String(), hex.EncodeToString(chainCode), nil
 }
 
 func getAddress(compressedPubKey []byte, netParams *chaincfg.Params) (string, error) {

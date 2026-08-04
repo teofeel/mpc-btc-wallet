@@ -66,6 +66,8 @@ func (m *JobManager) CompleteJob(jobID string, res *KeyGenResult) {
 		job.Status = pb.GetKeyGenStatusResponse_COMPLETED
 		job.PublicKeyHex = res.PublicKeyHex
 		job.BitcoinAddress = res.BitcoinAddress
+		job.XPub = res.XPub
+		job.ChainCodeHex = res.ChainCodeHex
 	}
 }
 

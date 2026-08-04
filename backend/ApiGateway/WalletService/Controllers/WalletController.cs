@@ -22,6 +22,7 @@ namespace WalletService.Controllers
         [HttpGet("{id:guid}/addresses")]
         [ProducesResponseType(typeof(List<WalletAddressesResponseDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetWalletAddresses(Guid id, CancellationToken token)
         {
             List<WalletAddressesResponseDTO> response = await _mediator.Send(new GetWalletAddressesQuery(id), token);
@@ -33,6 +34,20 @@ namespace WalletService.Controllers
         public async Task<IActionResult> GetAllAddresses()
         {
             return StatusCode(StatusCodes.Status501NotImplemented);
+        }
+
+        [HttpPost("{id:guid}/address")]
+        [ProducesResponseType(typeof(DeriveWalletAddressResponseDTO), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateNewWalletAddress(Guid id, CancellationToken token)
+        {
+
+            DeriveNewAddressCommand command = new DeriveNewAddressCommand(id);
+            DeriveWalletAddressResponseDTO response = await _mediator.Send(command);
+
+            return StatusCode(StatusCodes.Status201Created, response);
         }
 
 

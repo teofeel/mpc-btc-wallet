@@ -39,6 +39,7 @@ builder.Services.AddMediatR(cfg =>
 // Mappers
 builder.Services.AddScoped<CreateWalletMapper>();
 builder.Services.AddScoped<StartWalletCreationMapper>();
+builder.Services.AddScoped<DeriveAddressMapper>();
 builder.Services.AddScoped<IMapper<WalletAddress, WalletAddressesResponseDTO>, WalletAddressResponseMapper>();
 
 // Domain

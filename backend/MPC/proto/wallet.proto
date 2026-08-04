@@ -38,6 +38,8 @@ message GetKeyGenStatusResponse{
   string public_key_hex = 3;
   string bitcoin_address = 4;
   string error_message = 5;
+  string chain_code_hex = 6;
+  string xpub = 7;
 }
 
 /*message SignRequest {

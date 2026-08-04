@@ -22,6 +22,10 @@ type MpcServer struct {
 	pb.UnimplementedWalletMpcServiceServer
 	jobManager *dkg.JobManager
 	router     network.Router
+
+	preParamsMu   sync.Mutex
+	preParams     []*keygen.LocalPreParams
+	preParamsDone bool
 }
 
 func NewMpcServer(jobManager *dkg.JobManager, router network.Router) *MpcServer {
@@ -95,6 +99,22 @@ func (s *MpcServer) generatePreParamsList(sortedIds []*tss.PartyID, jobID string
 	return preParamsList
 }
 
+func (s *MpcServer) cachedPreParams(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
+	s.preParamsMu.Lock()
+	defer s.preParamsMu.Unlock()
+
+	if s.preParamsDone {
+		return s.preParams
+	}
+
+	list := s.generatePreParamsList(sortedIds, jobID)
+	if list != nil {
+		s.preParams = list
+		s.preParamsDone = true
+	}
+	return list
+}
+
 func (s *MpcServer) executeKeyGen(jobID, walletID string, netParams *chaincfg.Params) {
 	pID1 := tss.NewPartyID("1", "Node-1", big.NewInt(10))
 	pID2 := tss.NewPartyID("2", "Node-2", big.NewInt(20))
@@ -102,7 +122,7 @@ func (s *MpcServer) executeKeyGen(jobID, walletID string, netParams *chaincfg.Pa
 
 	sortedIds := tss.SortPartyIDs([]*tss.PartyID{pID1, pID2, pID3})
 
-	preParamsList := s.generatePreParamsList(sortedIds, walletID)
+	preParamsList := s.cachedPreParams(sortedIds, walletID)
 	if preParamsList == nil {
 		return
 	}
@@ -166,5 +186,7 @@ func (s *MpcServer) GetKeyGenStatus(ctx context.Context, req *pb.GetKeyGenStatus
 		PublicKeyHex:   job.PublicKeyHex,
 		BitcoinAddress: job.BitcoinAddress,
 		ErrorMessage:   job.ErrMsg,
+		ChainCodeHex:   job.ChainCodeHex,
+		Xpub:           job.XPub,
 	}, nil
 }
