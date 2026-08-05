@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-type MpcServer struct {
+type MemoryMpcServer struct {
 	pb.UnimplementedWalletMpcServiceServer
 	jobManager *dkg.JobManager
 	router     network.Router
@@ -26,10 +26,12 @@ type MpcServer struct {
 	preParamsMu   sync.Mutex
 	preParams     []*keygen.LocalPreParams
 	preParamsDone bool
+
+	parties []*tss.PartyID
 }
 
-func NewMpcServer(jobManager *dkg.JobManager, router network.Router) *MpcServer {
-	return &MpcServer{
+func NewMemoryMpcServer(jobManager *dkg.JobManager, router network.Router) *MemoryMpcServer {
+	return &MemoryMpcServer{
 		jobManager: jobManager,
 		router:     router,
 	}
@@ -77,7 +79,7 @@ func generateParams(idx int, preParamsList []*keygen.LocalPreParams, wg *sync.Wa
 	preParamsList[idx] = pp
 }
 
-func (s *MpcServer) generatePreParamsList(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
+func (s *MemoryMpcServer) generatePreParamsList(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
 	preParamsList := make([]*keygen.LocalPreParams, len(sortedIds))
 
 	var wg sync.WaitGroup
@@ -99,7 +101,7 @@ func (s *MpcServer) generatePreParamsList(sortedIds []*tss.PartyID, jobID string
 	return preParamsList
 }
 
-func (s *MpcServer) cachedPreParams(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
+func (s *MemoryMpcServer) cachedPreParams(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
 	s.preParamsMu.Lock()
 	defer s.preParamsMu.Unlock()
 
@@ -115,12 +117,23 @@ func (s *MpcServer) cachedPreParams(sortedIds []*tss.PartyID, jobID string) []*k
 	return list
 }
 
-func (s *MpcServer) executeKeyGen(jobID, walletID string, netParams *chaincfg.Params) {
+func (s *MemoryMpcServer) GetOrGenerateSortedPartyIDs() (*tss.PartyID, []*tss.PartyID) {
+	if len(s.parties) == 3 {
+		return s.parties[0], s.parties
+	}
+
 	pID1 := tss.NewPartyID("1", "Node-1", big.NewInt(10))
 	pID2 := tss.NewPartyID("2", "Node-2", big.NewInt(20))
 	pID3 := tss.NewPartyID("3", "Node-3", big.NewInt(30))
 
 	sortedIds := tss.SortPartyIDs([]*tss.PartyID{pID1, pID2, pID3})
+
+	s.parties = sortedIds
+	return pID1, sortedIds
+}
+
+func (s *MemoryMpcServer) executeKeyGen(jobID, walletID string, netParams *chaincfg.Params) {
+	pID1, sortedIds := s.GetOrGenerateSortedPartyIDs()
 
 	preParamsList := s.cachedPreParams(sortedIds, walletID)
 	if preParamsList == nil {
@@ -147,7 +160,7 @@ func (s *MpcServer) executeKeyGen(jobID, walletID string, netParams *chaincfg.Pa
 	s.jobManager.CompleteJob(jobID, result)
 }
 
-func (s *MpcServer) StartKeyGen(ctx context.Context, req *pb.StartKeyGenRequest) (*pb.StartKeyGenResponse, error) {
+func (s *MemoryMpcServer) StartKeyGen(ctx context.Context, req *pb.StartKeyGenRequest) (*pb.StartKeyGenResponse, error) {
 	err := checkErrors(ctx, req)
 	if err != nil {
 		return nil, err
@@ -170,7 +183,7 @@ func (s *MpcServer) StartKeyGen(ctx context.Context, req *pb.StartKeyGenRequest)
 	return &pb.StartKeyGenResponse{JobId: jobID}, nil
 }
 
-func (s *MpcServer) GetKeyGenStatus(ctx context.Context, req *pb.GetKeyGenStatusRequest) (*pb.GetKeyGenStatusResponse, error) {
+func (s *MemoryMpcServer) GetKeyGenStatus(ctx context.Context, req *pb.GetKeyGenStatusRequest) (*pb.GetKeyGenStatusResponse, error) {
 	if req.JobId == "" {
 		return nil, status.Error(codes.InvalidArgument, "jobId is required")
 	}
