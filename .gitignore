@@ -87,3 +87,6 @@ yarn-error.log*
 *.env
 
 *.idea*
+
+kms_config.json
+backend/MPC/data/shares/*
