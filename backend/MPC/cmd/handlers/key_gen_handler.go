@@ -13,6 +13,7 @@ import (
 	pb "mpc/gen/mpc"
 	"mpc/pkg/dkg"
 	"mpc/pkg/network"
+	"mpc/pkg/storage"
 	"strings"
 	"sync"
 	"time"
@@ -22,6 +23,7 @@ type MemoryMpcServer struct {
 	pb.UnimplementedWalletMpcServiceServer
 	jobManager *dkg.JobManager
 	router     network.Router
+	shareStore storage.PartyShareStore
 
 	preParamsMu   sync.Mutex
 	preParams     []*keygen.LocalPreParams
@@ -30,10 +32,11 @@ type MemoryMpcServer struct {
 	parties []*tss.PartyID
 }
 
-func NewMemoryMpcServer(jobManager *dkg.JobManager, router network.Router) *MemoryMpcServer {
+func NewMemoryMpcServer(jobManager *dkg.JobManager, router network.Router, shareStore storage.PartyShareStore) *MemoryMpcServer {
 	return &MemoryMpcServer{
 		jobManager: jobManager,
 		router:     router,
+		shareStore: shareStore,
 	}
 }
 
@@ -141,19 +144,24 @@ func (s *MemoryMpcServer) executeKeyGen(jobID, walletID string, netParams *chain
 	}
 
 	cfg := dkg.KeyGenConfig{
-		walletID,
-		pID1,
-		sortedIds,
-		1,
-		s.router,
-		netParams,
-		preParamsList,
-		2 * time.Minute,
+		WalletID:    walletID,
+		PartyID:     pID1,
+		AllPartyIDs: sortedIds,
+		Threshold:   1,
+		Router:      s.router,
+		Network:     netParams,
+		PreParams:   preParamsList,
+		Timeout:     2 * time.Minute,
 	}
 
 	result, err := dkg.RunKeyGen(context.Background(), cfg)
 	if err != nil {
 		s.jobManager.FailJob(jobID, err.Error())
+		return
+	}
+
+	if err := s.shareStore.Save(result.WalletId, result.SaveData); err != nil {
+		s.jobManager.FailJob(jobID, "failed to persist data: "+err.Error())
 		return
 	}
 
