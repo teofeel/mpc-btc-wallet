@@ -17,7 +17,7 @@ import (
 func main() {
 	jobManager := dkg.NewJobManager()
 	router := network.NewMemoryRouter()
-	mpcServer := handlers.NewMpcServer(jobManager, router)
+	mpcServer := handlers.NewMemoryMpcServer(jobManager, router)
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
