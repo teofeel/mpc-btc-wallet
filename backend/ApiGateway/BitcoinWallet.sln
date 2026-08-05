@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletService", "WalletService\WalletService.csproj", "{297AAA90-0FD7-4532-8C70-FECF73F789AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService", "TransactionService\TransactionService.csproj", "{ACF5724D-70F6-4F90-8921-0B4CCF270E25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{297AAA90-0FD7-4532-8C70-FECF73F789AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{297AAA90-0FD7-4532-8C70-FECF73F789AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{297AAA90-0FD7-4532-8C70-FECF73F789AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACF5724D-70F6-4F90-8921-0B4CCF270E25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACF5724D-70F6-4F90-8921-0B4CCF270E25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACF5724D-70F6-4F90-8921-0B4CCF270E25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACF5724D-70F6-4F90-8921-0B4CCF270E25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

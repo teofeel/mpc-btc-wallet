@@ -17,6 +17,24 @@
       "ServiceName": "Wallet-Service",
       "UseServiceDiscovery": true,
       "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/v1/transactions",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
+      "DownstreamPathTemplate": "/api/v1/transactions",
+      "DownstreamScheme": "http",
+      "ServiceName": "Transaction-Service",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/v1/transactions/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
+      "DownstreamPathTemplate": "/api/v1/transactions/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "Transaction-Service",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
     }
   ],
   "GlobalConfiguration": {
