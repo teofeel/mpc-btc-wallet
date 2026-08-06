@@ -35,6 +35,15 @@
       "ServiceName": "Transaction-Service",
       "UseServiceDiscovery": true,
       "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/v1/blockchain/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
+      "DownstreamPathTemplate": "/api/v1/blockchain/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "Blockchain-Indexing-Service",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
     }
   ],
   "GlobalConfiguration": {

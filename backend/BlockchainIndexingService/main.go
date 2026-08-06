@@ -3,6 +3,7 @@ package main
 import (
 	"BlockchainIndexingService/controllers"
 	"BlockchainIndexingService/db"
+	"BlockchainIndexingService/eureka"
 	"BlockchainIndexingService/indexers"
 	"BlockchainIndexingService/repository"
 	"BlockchainIndexingService/services"
@@ -39,6 +40,14 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	eurCfg := eureka.DefaultConfig()
+	cleanup, err := eureka.RegisterWithEureka(ctx, eurCfg)
+	if err != nil {
+		log.Printf("Eureka registration failed, continuing without it: %v", err)
+	} else {
+		defer cleanup()
+	}
+
 	rpcClient, err := CreateRpcClient()
 	if err != nil {
 		log.Fatal(err)
@@ -70,18 +79,21 @@ func main() {
 
 	router := chi.NewRouter()
 
-	addressService := services.NewAddressService(rpcClient, store)
-	addressController := controllers.NewAddressController(addressService)
-	addressController.RegisterRoutes(router)
+	router.Route("/api/v1/blockchain", func(r chi.Router) {
+		addressService := services.NewAddressService(rpcClient, store)
+		addressController := controllers.NewAddressController(addressService)
+		addressController.RegisterRoutes(r)
 
-	transactionController := controllers.NewTransactionController()
-	transactionController.RegisterRoutes(router)
+		transactionService := services.NewTransactionService(rpcClient, store)
+		transactionController := controllers.NewTransactionController(transactionService)
+		transactionController.RegisterRoutes(r)
 
-	chainStateService := services.NewChainStateService(rpcClient, store)
-	chainStateController := controllers.NewChainStateController(chainStateService)
-	chainStateController.RegisterRoutes(router)
+		chainStateService := services.NewChainStateService(rpcClient, store)
+		chainStateController := controllers.NewChainStateController(chainStateService)
+		chainStateController.RegisterRoutes(r)
+	})
 
-	port := utils.GetEnv("PORT", ":8082")
+	port := utils.GetEnv("PORT", ":8083")
 
 	fmt.Printf("Server running on %s\n", port)
 	if err := http.ListenAndServe(port, router); err != nil {
