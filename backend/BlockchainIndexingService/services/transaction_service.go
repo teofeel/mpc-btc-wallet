@@ -68,7 +68,7 @@ func (service *TransactionService) BroadcastTransaction(w http.ResponseWriter, r
 	utils.WriteJSON(w, http.StatusOK, map[string]string{"txID": txHash.String()})
 }
 
-func (service *TransactionService) DecodeTransaction(w http.ResponseWriter, req *http.Request) {
+func (service *TransactionService) DecodeTransaction(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Hex string
 	}
