@@ -8,6 +8,8 @@ using WalletService.Mappers;
 using WalletService.Mappers.Interfaces;
 using WalletService.Models;
 using WalletService.Services;
+using NBitcoin;
+using NBitcoin.RPC;
 using WalletService.Services.Interfaces;
 using WalletService.Services.MpcService;
 
@@ -55,6 +57,25 @@ builder.Services.AddGrpcClient<WalletMpcService.WalletMpcServiceClient>(options 
 {
     options.Address = new Uri(builder.Configuration["MpcService:Address"] ?? "http://localhost:50051");
 });
+
+// Bitcoin Core RPC client
+var btcNetworkStr = builder.Configuration["BitcoinCore:Network"] ?? "regtest";
+Network btcNetwork = btcNetworkStr.Trim().ToLowerInvariant() switch
+{
+    "mainnet" or "main" => Network.Main,
+    "testnet" or "test" => Network.TestNet,
+    "regtest" => Network.RegTest,
+    _ => Network.RegTest
+};
+
+var rpcHost = builder.Configuration["BitcoinCore:Host"] ?? "http://127.0.0.1:18443";
+var rpcUser = builder.Configuration["BitcoinCore:User"] ?? "user";
+var rpcPass = builder.Configuration["BitcoinCore:Password"] ?? "pass";
+
+var rpcClient = new RPCClient(new System.Net.NetworkCredential(rpcUser, rpcPass), new Uri(rpcHost), btcNetwork);
+
+builder.Services.AddSingleton(rpcClient);
+builder.Services.AddScoped<IBitcoinCoreService, BitcoinCoreService>();
 
 // MPC completion queue + background services
 builder.Services.AddSingleton<IMpcCompletionQueue, BitcoinWalletMpcCompletionQueue>();
