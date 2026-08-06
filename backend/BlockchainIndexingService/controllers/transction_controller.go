@@ -22,13 +22,14 @@ func (controller *TransactionController) RegisterRoutes(r chi.Router) {
 	})
 }
 
-func (controller *TransactionController) GetTransaction(w http.ResponseWriter, req *http.Request) {
-
+func (controller *TransactionController) GetTransaction(w http.ResponseWriter, r *http.Request) {
+	controller.service.GetTransaction(w, r)
 }
 
-func (controller *TransactionController) BroadcastTransaction(w http.ResponseWriter, req *http.Request) {
-
+func (controller *TransactionController) BroadcastTransaction(w http.ResponseWriter, r *http.Request) {
+	controller.service.BroadcastTransaction(w, r)
 }
 
-func (controller *TransactionController) DecodeTransaction(w http.ResponseWriter, req *http.Request) {
+func (controller *TransactionController) DecodeTransaction(w http.ResponseWriter, r *http.Request) {
+	controller.service.DecodeTransaction(w, r)
 }
