@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"BlockchainIndexingService/errors"
 	"BlockchainIndexingService/services"
+	"BlockchainIndexingService/utils"
 	"github.com/go-chi/chi/v5"
 	"net/http"
+	"strconv"
 )
 
 type ChainStateController struct {
@@ -25,17 +28,65 @@ func (controller *ChainStateController) RegisterRoutes(r chi.Router) {
 }
 
 func (controller *ChainStateController) GetBlockByHash(w http.ResponseWriter, r *http.Request) {
-	controller.service.GetBlockByHash(w, r)
+	hash := chi.URLParam(r, "hash")
+
+	block, err := controller.service.GetBlockByHash(r.Context(), hash)
+	if err != nil {
+		errors.GlobalErrorHandler(w, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, block)
 }
 
 func (controller *ChainStateController) GetBlockByHeight(w http.ResponseWriter, r *http.Request) {
-	controller.service.GetBlockByHeight(w, r)
+	height := chi.URLParam(r, "height")
+
+	heightInt, err := strconv.Atoi(height)
+	if err != nil {
+		errors.GlobalErrorHandler(w, errors.ErrInvalidArgument)
+		return
+	}
+
+	block, err := controller.service.GetBlockByHeight(r.Context(), heightInt)
+	if err != nil {
+		errors.GlobalErrorHandler(w, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, block)
 }
 
 func (controller *ChainStateController) GetChainStatus(w http.ResponseWriter, r *http.Request) {
-	controller.service.GetChainStatus(w, r)
+	res, err := controller.service.GetChainStatus(r.Context())
+	if err != nil {
+		errors.GlobalErrorHandler(w, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, res)
 }
 
 func (controller *ChainStateController) GetFeeEstimation(w http.ResponseWriter, r *http.Request) {
-	controller.service.GetFeeEstimation(w, r)
+	targetBlocksStr := r.URL.Query().Get("blocks")
+	targetBlocks := int64(6)
+
+	if targetBlocksStr != "" {
+		parsedTarget, err := strconv.ParseInt(targetBlocksStr, 10, 64)
+
+		if err != nil || parsedTarget <= 0 {
+			errors.GlobalErrorHandler(w, errors.ErrInvalidArgument)
+			return
+		}
+
+		targetBlocks = parsedTarget
+	}
+
+	res, err := controller.service.GetFeeEstimation(r.Context(), targetBlocks)
+	if err != nil {
+		errors.GlobalErrorHandler(w, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, res)
 }
