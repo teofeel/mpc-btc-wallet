@@ -46,7 +46,6 @@ func (service *ChainStateService) GetBlockByHeight(ctx context.Context, height i
 	}
 
 	return block, nil
-
 }
 
 func (service *ChainStateService) GetChainStatus(ctx context.Context) (dtos.ChainStatusResponse, error) {
@@ -63,11 +62,11 @@ func (service *ChainStateService) GetChainStatus(ctx context.Context) (dtos.Chai
 	var syncPct float64
 	if info.Blocks > 0 {
 		syncPct = float64(indexedHeight) / float64(info.Blocks)
-		if syncPct > 100 {
-			syncPct = 100
+		if syncPct > 1.0 {
+			syncPct = 1.0
 		}
 	} else if indexedHeight >= 0 {
-		syncPct = 100
+		syncPct = 1.0
 	}
 
 	res := dtos.ChainStatusResponse{
