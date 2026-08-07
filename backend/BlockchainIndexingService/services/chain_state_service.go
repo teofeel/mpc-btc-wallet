@@ -2,13 +2,12 @@ package services
 
 import (
 	"BlockchainIndexingService/dtos"
+	"BlockchainIndexingService/errors"
 	"BlockchainIndexingService/repository"
-	"BlockchainIndexingService/utils"
+	"context"
 	"github.com/btcsuite/btcd/chainhash/v2"
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/go-chi/chi/v5"
-	"net/http"
-	"strconv"
+	"github.com/btcsuite/btcd/wire/v2"
 )
 
 type ChainStateService struct {
@@ -20,65 +19,50 @@ func NewChainStateService(rpcClient *rpcclient.Client, store repository.Store) *
 	return &ChainStateService{rpcClient: rpcClient, store: store}
 }
 
-func (service *ChainStateService) GetBlockByHash(w http.ResponseWriter, r *http.Request) {
-	hash := chi.URLParam(r, "hash")
+func (service *ChainStateService) GetBlockByHash(ctx context.Context, hash string) (*wire.MsgBlock, error) {
 	blockHash, err := chainhash.NewHashFromStr(hash)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return nil, errors.ErrInvalidArgument
 	}
 
 	block, err := service.rpcClient.GetBlock(blockHash)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return nil, errors.ErrInternalServer
 	}
 
-	utils.WriteJSON(w, http.StatusOK, block)
+	return block, nil
+
 }
 
-func (service *ChainStateService) GetBlockByHeight(w http.ResponseWriter, r *http.Request) {
-	height := chi.URLParam(r, "height")
-
-	heightInt, err := strconv.Atoi(height)
+func (service *ChainStateService) GetBlockByHeight(ctx context.Context, height int) (*wire.MsgBlock, error) {
+	blockHash, err := service.rpcClient.GetBlockHash(int64(height))
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	blockHash, err := service.rpcClient.GetBlockHash(int64(heightInt))
-	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return nil, errors.ErrInvalidArgument
 	}
 
 	block, err := service.rpcClient.GetBlock(blockHash)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return nil, errors.ErrInternalServer
 	}
 
-	utils.WriteJSON(w, http.StatusOK, block)
+	return block, nil
+
 }
 
-func (service *ChainStateService) GetChainStatus(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
+func (service *ChainStateService) GetChainStatus(ctx context.Context) (dtos.ChainStatusResponse, error) {
 	info, err := service.rpcClient.GetBlockChainInfo()
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return dtos.ChainStatusResponse{}, errors.ErrInternalServer
 	}
 
 	indexedHeight, err := service.store.LastIndexedHeight(ctx)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return dtos.ChainStatusResponse{}, errors.ErrInternalServer
 	}
 
 	var syncPct float64
 	if info.Blocks > 0 {
-		syncPct = float64(info.Blocks) / float64(indexedHeight)
+		syncPct = float64(indexedHeight) / float64(info.Blocks)
 		if syncPct > 100 {
 			syncPct = 100
 		}
@@ -95,28 +79,14 @@ func (service *ChainStateService) GetChainStatus(w http.ResponseWriter, r *http.
 		VerificationProgress: info.VerificationProgress,
 	}
 
-	utils.WriteJSON(w, http.StatusOK, res)
+	return res, nil
 }
 
-func (service *ChainStateService) GetFeeEstimation(w http.ResponseWriter, r *http.Request) {
-	targetBlocksStr := r.URL.Query().Get("blocks")
-	targetBlocks := int64(6)
-
-	if targetBlocksStr != "" {
-		parsedTarget, err := strconv.ParseInt(targetBlocksStr, 10, 64)
-
-		if err != nil || parsedTarget <= 0 {
-			utils.WriteErr(w, http.StatusBadRequest, "invalid 'blocks' parameter; must be a positive integer")
-			return
-		}
-
-		targetBlocks = parsedTarget
-	}
+func (service *ChainStateService) GetFeeEstimation(ctx context.Context, targetBlocks int64) (dtos.FeeEstimationResponse, error) {
 
 	feeResult, err := service.rpcClient.EstimateSmartFee(targetBlocks, nil)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return dtos.FeeEstimationResponse{}, errors.ErrInternalServer
 	}
 
 	var btcPerKb float64
@@ -132,5 +102,6 @@ func (service *ChainStateService) GetFeeEstimation(w http.ResponseWriter, r *htt
 		FeeRateBtcKB: btcPerKb,
 	}
 
-	utils.WriteJSON(w, http.StatusOK, res)
+	return res, nil
+
 }

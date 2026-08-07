@@ -1,14 +1,14 @@
 package services
 
 import (
+	"BlockchainIndexingService/errors"
 	"BlockchainIndexingService/repository"
 	"BlockchainIndexingService/utils"
+	"context"
 	"encoding/hex"
-	"encoding/json"
+	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chainhash/v2"
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/go-chi/chi/v5"
-	"net/http"
 )
 
 type TransactionService struct {
@@ -20,75 +20,49 @@ func NewTransactionService(rpcClient *rpcclient.Client, store repository.Store) 
 	return &TransactionService{rpcClient: rpcClient, store: store}
 }
 
-func (service *TransactionService) GetTransaction(w http.ResponseWriter, r *http.Request) {
-	txID := chi.URLParam(r, "txID")
+func (service *TransactionService) GetTransaction(ctx context.Context, txID string) (*btcjson.GetTransactionResult, error) {
 	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
-		utils.WriteErr(w, http.StatusBadRequest, err.Error())
-		return
+		return nil, errors.ErrInvalidTransaction
 	}
 
 	tx, err := service.rpcClient.GetTransaction(hash)
 	if err != nil {
-		utils.WriteErr(w, http.StatusNotFound, err.Error())
-		return
+		return nil, errors.ErrNotFound
 	}
 
-	utils.WriteJSON(w, http.StatusOK, tx)
+	return tx, nil
 }
 
-func (service *TransactionService) BroadcastTransaction(w http.ResponseWriter, r *http.Request) {
-	var body struct {
-		Hex string
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		utils.WriteErr(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	raw, err := hex.DecodeString(body.Hex)
+func (service *TransactionService) BroadcastTransaction(ctx context.Context, hexTx string) (string, error) {
+	raw, err := hex.DecodeString(hexTx)
 	if err != nil {
-		utils.WriteErr(w, http.StatusBadRequest, err.Error())
-		return
+		return "", errors.ErrInvalidTransaction
 	}
 
 	msgTx, err := utils.DecodeTxBytes(raw)
 	if err != nil {
-		utils.WriteErr(w, http.StatusBadRequest, err.Error())
-		return
+		return "", errors.ErrInvalidTransaction
 	}
 
 	txHash, err := service.rpcClient.SendRawTransaction(msgTx, false)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return "", errors.ErrInternalServer
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{"txID": txHash.String()})
+	return txHash.String(), nil
 }
 
-func (service *TransactionService) DecodeTransaction(w http.ResponseWriter, r *http.Request) {
-	var body struct {
-		Hex string
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		utils.WriteErr(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	raw, err := hex.DecodeString(body.Hex)
+func (service *TransactionService) DecodeTransaction(ctx context.Context, hexTx string) (*btcjson.TxRawResult, error) {
+	raw, err := hex.DecodeString(hexTx)
 	if err != nil {
-		utils.WriteErr(w, http.StatusBadRequest, err.Error())
-		return
+		return nil, errors.ErrInvalidTransaction
 	}
 
 	result, err := service.rpcClient.DecodeRawTransaction(raw)
 	if err != nil {
-		utils.WriteErr(w, http.StatusBadRequest, err.Error())
-		return
+		return nil, errors.ErrInvalidTransaction
 	}
 
-	utils.WriteJSON(w, http.StatusOK, result)
+	return result, nil
 }

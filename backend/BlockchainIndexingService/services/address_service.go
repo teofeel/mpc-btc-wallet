@@ -1,10 +1,12 @@
 package services
 
 import (
+	"BlockchainIndexingService/errors"
+	"BlockchainIndexingService/models"
 	"BlockchainIndexingService/repository"
 	"BlockchainIndexingService/utils"
+	"context"
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
@@ -17,34 +19,28 @@ func NewAddressService(rpcClient *rpcclient.Client, store repository.Store) *Add
 	return &AddressService{rpcClient: rpcClient, store: store}
 }
 
-func (service *AddressService) GetAddressUTXOs(w http.ResponseWriter, r *http.Request) {
-	addr := chi.URLParam(r, "address")
-
+func (service *AddressService) GetAddressUTXOs(ctx context.Context, addr string) ([]models.UTXO, error) {
 	tip, err := service.rpcClient.GetBlockCount()
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return nil, errors.ErrInternalServer
 	}
 
-	utxos, err := service.store.UTXOsForAddress(r.Context(), addr, tip)
+	utxos, err := service.store.UTXOsForAddress(ctx, addr, tip)
 	if err != nil {
-		utils.WriteErr(w, http.StatusInternalServerError, err.Error())
-		return
+		return nil, errors.ErrInternalServer
 	}
 
-	utils.WriteJSON(w, http.StatusOK, utxos)
+	return utxos, nil
 }
 
-func (service *AddressService) GetWalletBalance(w http.ResponseWriter, r *http.Request) {
-	addr := chi.URLParam(r, "address")
+func (service *AddressService) GetWalletBalance(ctx context.Context, addr string) (int64, error) {
 
-	balance, err := service.store.BalanceForAddress(r.Context(), addr)
+	balance, err := service.store.BalanceForAddress(ctx, addr)
 	if err != nil {
-		utils.WriteErr(w, http.StatusNotFound, err.Error())
-		return
+		return 0, errors.ErrInvalidAddress
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]int64{"confirmed_balance": balance})
+	return balance, nil
 }
 
 func (service *AddressService) GetWalletTransactions(w http.ResponseWriter, r *http.Request) {
