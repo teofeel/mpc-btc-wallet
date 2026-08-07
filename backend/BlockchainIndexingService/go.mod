@@ -11,6 +11,8 @@ require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/hudl/fargo v1.4.0
 	github.com/jackc/pgx/v5 v5.10.0
+	google.golang.org/grpc v1.83.0
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
@@ -31,11 +33,12 @@ require (
 	github.com/kcalvinalvin/anet v0.0.0-20251112173137-d8ddc1f6dbee // indirect
 	github.com/miekg/dns v1.1.43 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 // indirect
-	golang.org/x/crypto v0.40.0 // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
-	golang.org/x/text v0.29.0 // indirect
+	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 	gopkg.in/gcfg.v1 v1.2.3 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
