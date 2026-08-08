@@ -1,4 +1,4 @@
-﻿using TransactionService.DTOs;
+using TransactionService.DTOs;
 using TransactionService.Mappers.Interfaces;
 using TransactionService.Models;
 
@@ -9,7 +9,7 @@ namespace TransactionService.Mappers
 
         public Transaction ToEntity(TransactionResponseDTO data)
         {
-            return null;
+            throw new NotImplementedException("ToEntity is not implemented yet.");
         }
 
         public TransactionResponseDTO ToDto(Transaction data)

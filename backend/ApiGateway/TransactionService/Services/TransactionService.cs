@@ -27,10 +27,11 @@ namespace TransactionService.Services
         private const int ESTIMATED_TX_VBYTES = 140;
 
         public TransactionService(ChainStateService.ChainStateServiceClient chainStateClient, Proto.TransactionService.TransactionServiceClient transactionClient,
-            IMemoryCache cache, ILogger<TransactionService> logger, Network network, TransactionResponseMapper transactionResponseMapper)
+            TransactionDbContext dbContext, IMemoryCache cache, ILogger<TransactionService> logger, Network network, TransactionResponseMapper transactionResponseMapper)
         {
             _chainStateClient = chainStateClient;
             _transactionClient = transactionClient;
+            _dbContext = dbContext;
             _cache = cache;
             _logger = logger;
             _network = network;
@@ -39,12 +40,12 @@ namespace TransactionService.Services
 
         public Task<TransactionResponseDTO> MakeTransactionAsync(TransactionRequestDTO request)
         {
-            return null;
+            throw new NotImplementedException("MakeTransactionAsync is not implemented yet.");
         }
 
         public async Task<TransactionResponseDTO> GetTransactionByIdAsync(Guid id)
         {
-            Models.Transaction tx = await _dbContext.Transactions.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
+            Models.Transaction? tx = await _dbContext.Transactions.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
 
             if (tx == null)
             {
@@ -144,7 +145,7 @@ namespace TransactionService.Services
 
         public async Task UpdateTransactionConfirmationsAsync(string txHash)
         {
-            Models.Transaction tx = await _dbContext.Transactions.FirstOrDefaultAsync(t => t.TxHash == txHash);
+            Models.Transaction? tx = await _dbContext.Transactions.FirstOrDefaultAsync(t => t.TxHash == txHash);
 
             if (tx == null) return;
 

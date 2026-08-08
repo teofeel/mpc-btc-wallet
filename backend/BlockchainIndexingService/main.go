@@ -44,7 +44,7 @@ func CreateRpcClient() (*rpcclient.Client, error) {
 }
 
 func StartRpcServer(addressService *services.AddressService, chainStateService *services.ChainStateService, transactionService *services.TransactionService) *grpc.Server {
-	grpcPort := utils.GetEnv("GRPC_PORT", ":50051")
+	grpcPort := utils.GetEnv("GRPC_PORT", ":50052")
 
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
