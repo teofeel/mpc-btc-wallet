@@ -14,18 +14,16 @@ namespace WalletService.Services
         private readonly CreateWalletMapper _createWalletMapper;
         private readonly StartWalletCreationMapper _startWalletCreationMapper;
         private readonly IWalletMpcService _walletMpcService;
-        private readonly IBitcoinCoreService _bitcoinCoreService;
         private readonly ILogger<BitcoinWalletCreationService> _logger;
 
         public BitcoinWalletCreationService(WalletDbContext dbContext, StartWalletCreationMapper startWalletCreationMapper,
             CreateWalletMapper createWalletMapper, IWalletMpcService walletMpcService,
-            IBitcoinCoreService bitcoinCoreService, ILogger<BitcoinWalletCreationService> logger)
+            ILogger<BitcoinWalletCreationService> logger)
         {
             _dbContext = dbContext;
             _startWalletCreationMapper = startWalletCreationMapper;
             _createWalletMapper = createWalletMapper;
             _walletMpcService = walletMpcService;
-            _bitcoinCoreService = bitcoinCoreService;
             _logger = logger;
         }
 
@@ -88,19 +86,6 @@ namespace WalletService.Services
 
             await _dbContext.WalletAddresses.AddAsync(address);
             await _dbContext.SaveChangesAsync();
-
-            try
-            {
-                await _bitcoinCoreService.RegisterWalletDescriptorAsync(
-                    extendedPublicKey, wallet.Network, ct);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex,
-                    "[Wallet Service] Wallet {WalletId} activated but descriptor registration with bitcoind failed " +
-                    "The node will not watch this wallet until the descriptors are imported",
-                    walletId);
-            }
 
             return _createWalletMapper.ToDto(wallet);
         }
