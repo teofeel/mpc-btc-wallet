@@ -12,9 +12,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bnb-chain/tss-lib/v2/ecdsa/keygen"
 	"mpc/pkg/kms"
 	"mpc/pkg/utils"
+
+	"github.com/bnb-chain/tss-lib/v2/ecdsa/keygen"
 )
 
 const formatVersion byte = 0x01
@@ -116,11 +117,6 @@ func (s *EncryptedLocalShareStore) Save(walletID string, saveData *keygen.LocalP
 	return os.Rename(tmpFile, s.getFilePath(walletID))
 }
 
-// SaveAll persists every party share of a wallet. Each share is written to its
-// own file keyed by the share's ID (the party's KeyInt), e.g.
-// {walletID}:{shareID}.share.enc, so a wallet's full party set can be
-// restored for in-process ceremonies. The own share is additionally kept at
-// {walletID}.share.enc via Save for backward compatibility.
 func (s *EncryptedLocalShareStore) SaveAll(walletID string, saveDataByShare map[string]*keygen.LocalPartySaveData) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -156,9 +152,6 @@ func (s *EncryptedLocalShareStore) Get(walletID string) (*keygen.LocalPartySaveD
 	return s.readShare(walletID)
 }
 
-// GetAll loads every party share of a wallet from its own {walletID}.share.enc
-// file plus the {walletID}:*.share.enc party files, and returns them keyed by
-// share ID (the party's KeyInt).
 func (s *EncryptedLocalShareStore) GetAll(walletID string) (map[string]*keygen.LocalPartySaveData, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

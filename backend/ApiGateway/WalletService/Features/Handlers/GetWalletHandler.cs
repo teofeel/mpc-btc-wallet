@@ -72,12 +72,7 @@ namespace WalletService.Features.Handlers
                 return null;
             }
         }
-
-        /// <summary>
-        /// Compressed pubkey (33 bytes, hex) that owns the given address.
-        /// The first address (index 0, receive) is the keygen master address, which is
-        /// the xpub's own key; every later address is a BIP84 child of the account xpub.
-        /// </summary>
+        
         private static string DerivePubKeyHex(ExtPubKey accountXPub, WalletAddress address)
         {
             PubKey pubKey = address.AddressIndex == 0 && !address.IsChange
