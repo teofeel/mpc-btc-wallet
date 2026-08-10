@@ -47,6 +47,7 @@ builder.Services
     .AddEureka();
 
 // Add services to the container.
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();

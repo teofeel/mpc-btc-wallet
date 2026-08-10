@@ -112,6 +112,88 @@ func TestSaveGetRoundTrip(t *testing.T) {
 	}
 }
 
+func TestSaveAllGetAllRoundTrip(t *testing.T) {
+	store := newTestStore(t, &fakeKMS{key: []byte("01234567890123456789012345678901")})
+
+	shares := make(map[string]*keygen.LocalPartySaveData)
+	for _, shareID := range []int64{10, 20, 30} {
+		sd := makeSaveData(t)
+		sd.ShareID = big.NewInt(shareID)
+		shares[big.NewInt(shareID).String()] = sd
+	}
+
+	if err := store.SaveAll("wallet-1", shares); err != nil {
+		t.Fatalf("SaveAll: %v", err)
+	}
+
+	got, err := store.GetAll("wallet-1")
+	if err != nil {
+		t.Fatalf("GetAll: %v", err)
+	}
+
+	if len(got) != len(shares) {
+		t.Fatalf("GetAll returned %d shares, want %d", len(got), len(shares))
+	}
+
+	for key, want := range shares {
+		share := got[key]
+		if share == nil {
+			t.Fatalf("GetAll missing share %s", key)
+		}
+		if share.Xi == nil || share.Xi.Cmp(want.Xi) != 0 {
+			t.Fatalf("share %s: Xi lost in round-trip: %v", key, share.Xi)
+		}
+		if share.ShareID == nil || share.ShareID.Cmp(want.ShareID) != 0 {
+			t.Fatalf("share %s: ShareID lost in round-trip: %v", key, share.ShareID)
+		}
+	}
+}
+
+func TestSaveAllKeepsOwnShareFileSeparate(t *testing.T) {
+	store := newTestStore(t, &fakeKMS{key: []byte("01234567890123456789012345678901")})
+
+	own := makeSaveData(t)
+	own.ShareID = big.NewInt(10)
+	if err := store.Save("wallet-1", own); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	peers := make(map[string]*keygen.LocalPartySaveData)
+	for _, shareID := range []int64{20, 30} {
+		sd := makeSaveData(t)
+		sd.ShareID = big.NewInt(shareID)
+		peers[big.NewInt(shareID).String()] = sd
+	}
+	if err := store.SaveAll("wallet-1", peers); err != nil {
+		t.Fatalf("SaveAll: %v", err)
+	}
+
+	// Own share file must still be readable via Get.
+	if _, err := store.Get("wallet-1"); err != nil {
+		t.Fatalf("Get own share after SaveAll: %v", err)
+	}
+
+	// GetAll must return every party share, own included.
+	got, err := store.GetAll("wallet-1")
+	if err != nil {
+		t.Fatalf("GetAll: %v", err)
+	}
+	for _, wantID := range []int64{10, 20, 30} {
+		key := big.NewInt(wantID).String()
+		if got[key] == nil {
+			t.Fatalf("GetAll missing share %s", key)
+		}
+	}
+}
+
+func TestGetAllMissingWallet(t *testing.T) {
+	store := newTestStore(t, &fakeKMS{key: []byte("01234567890123456789012345678901")})
+
+	if _, err := store.GetAll("no-such-wallet"); err == nil {
+		t.Fatal("GetAll on a wallet with no shares should fail")
+	}
+}
+
 func TestEnvelopeLayoutOnDisk(t *testing.T) {
 	masterKey := []byte("01234567890123456789012345678901")
 	store := newTestStore(t, &fakeKMS{key: masterKey})

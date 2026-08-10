@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package walletinfo;
+
+option csharp_namespace = "WalletInfo";
+
+service WalletServiceGrpc {
+  rpc GetWallet (GetWalletRequest) returns (GetWalletResponse);
+}
+
+message GetWalletRequest {
+  string wallet_id = 1;
+}
+
+message GetWalletResponse {
+  string wallet_id = 1;
+  string name = 2;
+  string network = 3;
+  string status = 4;
+  string derivation_path = 5;
+  string extended_public_key = 6;
+  repeated WalletAddressDto addresses = 7;
+}
+
+message WalletAddressDto {
+  string address = 1;
+  int32 address_index = 2;
+  bool is_change = 3;
+  string public_key_hex = 4;
+}

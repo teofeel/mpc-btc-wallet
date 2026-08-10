@@ -12,9 +12,6 @@ import (
 	"BlockchainIndexingService/utils"
 	"context"
 	"fmt"
-	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/go-chi/chi/v5"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"net/http"
@@ -22,6 +19,10 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/go-chi/chi/v5"
+	"google.golang.org/grpc"
 )
 
 func CreateRpcClient() (*rpcclient.Client, error) {
@@ -44,7 +45,7 @@ func CreateRpcClient() (*rpcclient.Client, error) {
 }
 
 func StartRpcServer(addressService *services.AddressService, chainStateService *services.ChainStateService, transactionService *services.TransactionService) *grpc.Server {
-	grpcPort := utils.GetEnv("GRPC_PORT", ":50051")
+	grpcPort := utils.GetEnv("GRPC_PORT", ":50052")
 
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
@@ -146,6 +147,7 @@ func main() {
 	transactionService := services.NewTransactionService(rpcClient, store)
 	chainStateService := services.NewChainStateService(rpcClient, store)
 
+	log.Println("starting indexer")
 	idx := indexers.NewIndexer(rpcClient, store)
 	go idx.Run(ctx)
 

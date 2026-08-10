@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "BlockchainIndexingService/proto;proto";
+
+service AddressService {
+  rpc GetAddressUTXOs (GetAddressUTXOsRequest) returns (GetAddressUTXOsResponse);
+  rpc GetWalletBalance (GetWalletBalanceRequest) returns (GetWalletBalanceResponse);
+}
+
+message GetAddressUTXOsRequest {
+  string address = 1;
+}
+
+message UTXO {
+  string tx_id = 1;
+  uint32 vout = 2;
+  string address = 3;
+  int64 amount_sats = 4;
+  int64 block_height = 5;
+  int64 confirmations = 6;
+}
+
+message GetAddressUTXOsResponse {
+  repeated UTXO utxos = 1;
+}
+
+message GetWalletBalanceRequest {
+  string address = 1;
+}
+
+message GetWalletBalanceResponse {
+  int64 confirmed_balance = 1;
+}
