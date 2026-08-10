@@ -5,12 +5,13 @@ import (
 	"BlockchainIndexingService/repository"
 	"BlockchainIndexingService/utils"
 	"context"
+	"log"
+	"time"
+
 	"github.com/btcsuite/btcd/chaincfg/v2"
 	"github.com/btcsuite/btcd/chainhash/v2"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/txscript/v2"
-	"log"
-	"time"
 )
 
 type BitcoinIndexer struct {
@@ -41,6 +42,7 @@ func (idx *BitcoinIndexer) Run(ctx context.Context) {
 }
 
 func (idx *BitcoinIndexer) catchUp(ctx context.Context) error {
+	log.Println("Catching up")
 	tip, err := idx.rpcClient.GetBlockCount()
 	if err != nil {
 		return err
@@ -50,6 +52,8 @@ func (idx *BitcoinIndexer) catchUp(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	log.Printf("[DEBUG] DB Last Height: %d | Bitcoind Tip Height: %d\n", last, tip)
 
 	for h := last + 1; h <= tip; h++ {
 		if err := idx.indexBlockAtHeight(ctx, h); err != nil {

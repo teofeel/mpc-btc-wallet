@@ -6,6 +6,8 @@ import (
 	"BlockchainIndexingService/utils"
 	"context"
 	"encoding/hex"
+	"log"
+
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chainhash/v2"
 	"github.com/btcsuite/btcd/rpcclient"
@@ -47,6 +49,7 @@ func (service *TransactionService) BroadcastTransaction(ctx context.Context, hex
 
 	txHash, err := service.rpcClient.SendRawTransaction(msgTx, false)
 	if err != nil {
+		log.Printf("[BroadcastTransaction] SendRawTransaction rejected tx: %v", err)
 		return "", errors.ErrInternalServer
 	}
 

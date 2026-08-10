@@ -1,3 +1,4 @@
+using Grpc.AspNetCore.Web;
 using Microsoft.EntityFrameworkCore;
 using Steeltoe.Discovery.Eureka;
 using WalletService.BgServices;
@@ -51,6 +52,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 // GRPC
+builder.Services.AddGrpc();
 builder.Services.AddGrpcClient<WalletMpcService.WalletMpcServiceClient>(options =>
 {
     options.Address = new Uri(builder.Configuration["MpcService:Address"] ?? "http://localhost:50051");
@@ -77,7 +79,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseGrpcWeb();
+
 app.MapControllers();
 
+app.MapGrpcService<WalletGrpcService>().EnableGrpcWeb();
 
 app.Run();

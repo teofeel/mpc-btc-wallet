@@ -116,10 +116,89 @@ func (s *EncryptedLocalShareStore) Save(walletID string, saveData *keygen.LocalP
 	return os.Rename(tmpFile, s.getFilePath(walletID))
 }
 
+// SaveAll persists every party share of a wallet. Each share is written to its
+// own file keyed by the share's ID (the party's KeyInt), e.g.
+// {walletID}:{shareID}.share.enc, so a wallet's full party set can be
+// restored for in-process ceremonies. The own share is additionally kept at
+// {walletID}.share.enc via Save for backward compatibility.
+func (s *EncryptedLocalShareStore) SaveAll(walletID string, saveDataByShare map[string]*keygen.LocalPartySaveData) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for shareID, saveData := range saveDataByShare {
+		plaintext, err := json.Marshal(saveData)
+		if err != nil {
+			return err
+		}
+
+		blob, err := s.encrypt(walletID+":"+shareID, plaintext)
+		if err != nil {
+			return err
+		}
+
+		tmpFile := filepath.Join(s.baseDir, fmt.Sprintf("%s:%s.share.enc.tmp", walletID, shareID))
+		if err := os.WriteFile(tmpFile, blob, 0600); err != nil {
+			return err
+		}
+
+		if err := os.Rename(tmpFile, s.getFilePath(walletID+":"+shareID)); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (s *EncryptedLocalShareStore) Get(walletID string) (*keygen.LocalPartySaveData, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
+	return s.readShare(walletID)
+}
+
+// GetAll loads every party share of a wallet from its own {walletID}.share.enc
+// file plus the {walletID}:*.share.enc party files, and returns them keyed by
+// share ID (the party's KeyInt).
+func (s *EncryptedLocalShareStore) GetAll(walletID string) (map[string]*keygen.LocalPartySaveData, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	result := make(map[string]*keygen.LocalPartySaveData)
+
+	if own, err := s.readShare(walletID); err == nil {
+		result[own.ShareID.String()] = own
+	} else if !os.IsNotExist(err) {
+		return nil, err
+	}
+
+	prefix := walletID + ":"
+	entries, err := os.ReadDir(s.baseDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasPrefix(entry.Name(), prefix) || !strings.HasSuffix(entry.Name(), ".share.enc") {
+			continue
+		}
+
+		key := strings.TrimSuffix(strings.TrimPrefix(entry.Name(), prefix), ".share.enc")
+		saveData, err := s.readShare(walletID + ":" + key)
+		if err != nil {
+			return nil, err
+		}
+
+		result[saveData.ShareID.String()] = saveData
+	}
+
+	if len(result) == 0 {
+		return nil, fmt.Errorf("no key shares found for wallet %s", walletID)
+	}
+
+	return result, nil
+}
+
+func (s *EncryptedLocalShareStore) readShare(walletID string) (*keygen.LocalPartySaveData, error) {
 	ciphertext, err := os.ReadFile(s.getFilePath(walletID))
 	if err != nil {
 		return nil, err

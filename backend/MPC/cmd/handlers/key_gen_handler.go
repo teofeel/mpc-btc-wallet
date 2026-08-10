@@ -3,61 +3,51 @@ package handlers
 import (
 	"context"
 	"fmt"
+	pb "mpc/gen/mpc"
+	"mpc/pkg/dkg"
+	"mpc/pkg/network"
+	"mpc/pkg/storage"
+	"sync"
+	"time"
+
 	"github.com/bnb-chain/tss-lib/v2/ecdsa/keygen"
 	"github.com/bnb-chain/tss-lib/v2/tss"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"math/big"
-	pb "mpc/gen/mpc"
-	"mpc/pkg/dkg"
-	"mpc/pkg/network"
-	"mpc/pkg/storage"
-	"strings"
-	"sync"
-	"time"
 )
 
-type MemoryMpcServer struct {
+type KeyGenHandler interface {
+	pb.WalletMpcServiceServer
+}
+
+type MemoryKeyGenHandler struct {
 	pb.UnimplementedWalletMpcServiceServer
+
 	jobManager *dkg.JobManager
 	router     network.Router
 	shareStore storage.PartyShareStore
 
+	ownPartyID  *tss.PartyID
+	allPartyIDs []*tss.PartyID
+
 	preParamsMu   sync.Mutex
 	preParams     []*keygen.LocalPreParams
 	preParamsDone bool
-
-	parties []*tss.PartyID
 }
 
-func NewMemoryMpcServer(jobManager *dkg.JobManager, router network.Router, shareStore storage.PartyShareStore) *MemoryMpcServer {
-	return &MemoryMpcServer{
-		jobManager: jobManager,
-		router:     router,
-		shareStore: shareStore,
+func NewMemoryKeyGenHandler(jobManager *dkg.JobManager, router network.Router, shareStore storage.PartyShareStore, ownPartyID *tss.PartyID, allPartyIDs []*tss.PartyID) KeyGenHandler {
+	return &MemoryKeyGenHandler{
+		jobManager:  jobManager,
+		router:      router,
+		shareStore:  shareStore,
+		ownPartyID:  ownPartyID,
+		allPartyIDs: allPartyIDs,
 	}
 }
 
-func getNetwork(network string) (*chaincfg.Params, error) {
-	switch strings.ToLower(strings.TrimSpace(network)) {
-	case "mainnet", "livenet", "":
-		return &chaincfg.MainNetParams, nil
-	case "testnet", "testnet3":
-		return &chaincfg.TestNet3Params, nil
-	case "regtest":
-		return &chaincfg.RegressionNetParams, nil
-	case "simnet":
-		return &chaincfg.SimNetParams, nil
-	case "signet":
-		return &chaincfg.SigNetParams, nil
-	default:
-		return nil, fmt.Errorf("unsupported bitcoin network: %q", network)
-	}
-}
-
-func checkErrors(ctx context.Context, req *pb.StartKeyGenRequest) error {
+func checkKeyGenRequest(ctx context.Context, req *pb.StartKeyGenRequest) error {
 	if err := ctx.Err(); err != nil {
 		return status.Error(codes.Canceled, "request was canceled by client")
 	}
@@ -82,7 +72,7 @@ func generateParams(idx int, preParamsList []*keygen.LocalPreParams, wg *sync.Wa
 	preParamsList[idx] = pp
 }
 
-func (s *MemoryMpcServer) generatePreParamsList(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
+func (h *MemoryKeyGenHandler) generatePreParamsList(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
 	preParamsList := make([]*keygen.LocalPreParams, len(sortedIds))
 
 	var wg sync.WaitGroup
@@ -97,58 +87,41 @@ func (s *MemoryMpcServer) generatePreParamsList(sortedIds []*tss.PartyID, jobID 
 	close(errs)
 
 	if err := <-errs; err != nil {
-		s.jobManager.FailJob(jobID, "failed to generate pre-params: "+err.Error())
+		h.jobManager.FailJob(jobID, "failed to generate pre-params: "+err.Error())
 		return nil
 	}
 
 	return preParamsList
 }
 
-func (s *MemoryMpcServer) cachedPreParams(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
-	s.preParamsMu.Lock()
-	defer s.preParamsMu.Unlock()
+func (h *MemoryKeyGenHandler) cachedPreParams(sortedIds []*tss.PartyID, jobID string) []*keygen.LocalPreParams {
+	h.preParamsMu.Lock()
+	defer h.preParamsMu.Unlock()
 
-	if s.preParamsDone {
-		return s.preParams
+	if h.preParamsDone {
+		return h.preParams
 	}
 
-	list := s.generatePreParamsList(sortedIds, jobID)
+	list := h.generatePreParamsList(sortedIds, jobID)
 	if list != nil {
-		s.preParams = list
-		s.preParamsDone = true
+		h.preParams = list
+		h.preParamsDone = true
 	}
 	return list
 }
 
-func (s *MemoryMpcServer) GetOrGenerateSortedPartyIDs() (*tss.PartyID, []*tss.PartyID) {
-	if len(s.parties) == 3 {
-		return s.parties[0], s.parties
-	}
-
-	pID1 := tss.NewPartyID("1", "Node-1", big.NewInt(10))
-	pID2 := tss.NewPartyID("2", "Node-2", big.NewInt(20))
-	pID3 := tss.NewPartyID("3", "Node-3", big.NewInt(30))
-
-	sortedIds := tss.SortPartyIDs([]*tss.PartyID{pID1, pID2, pID3})
-
-	s.parties = sortedIds
-	return pID1, sortedIds
-}
-
-func (s *MemoryMpcServer) executeKeyGen(jobID, walletID string, netParams *chaincfg.Params) {
-	pID1, sortedIds := s.GetOrGenerateSortedPartyIDs()
-
-	preParamsList := s.cachedPreParams(sortedIds, walletID)
+func (h *MemoryKeyGenHandler) executeKeyGen(jobID, walletID string, netParams *chaincfg.Params) {
+	preParamsList := h.cachedPreParams(h.allPartyIDs, walletID)
 	if preParamsList == nil {
 		return
 	}
 
 	cfg := dkg.KeyGenConfig{
 		WalletID:    walletID,
-		PartyID:     pID1,
-		AllPartyIDs: sortedIds,
+		PartyID:     h.ownPartyID,
+		AllPartyIDs: h.allPartyIDs,
 		Threshold:   1,
-		Router:      s.router,
+		Router:      h.router,
 		Network:     netParams,
 		PreParams:   preParamsList,
 		Timeout:     2 * time.Minute,
@@ -156,47 +129,52 @@ func (s *MemoryMpcServer) executeKeyGen(jobID, walletID string, netParams *chain
 
 	result, err := dkg.RunKeyGen(context.Background(), cfg)
 	if err != nil {
-		s.jobManager.FailJob(jobID, err.Error())
+		h.jobManager.FailJob(jobID, err.Error())
 		return
 	}
 
-	if err := s.shareStore.Save(result.WalletId, result.SaveData); err != nil {
-		s.jobManager.FailJob(jobID, "failed to persist data: "+err.Error())
+	if err := h.shareStore.Save(result.WalletId, result.SaveData); err != nil {
+		h.jobManager.FailJob(jobID, "failed to persist data: "+err.Error())
 		return
 	}
 
-	s.jobManager.CompleteJob(jobID, result)
+	if err := h.shareStore.SaveAll(result.WalletId, result.AllSaveData); err != nil {
+		h.jobManager.FailJob(jobID, "failed to persist party shares: "+err.Error())
+		return
+	}
+
+	h.jobManager.CompleteJob(jobID, result)
 }
 
-func (s *MemoryMpcServer) StartKeyGen(ctx context.Context, req *pb.StartKeyGenRequest) (*pb.StartKeyGenResponse, error) {
-	err := checkErrors(ctx, req)
+func (h *MemoryKeyGenHandler) StartKeyGen(ctx context.Context, req *pb.StartKeyGenRequest) (*pb.StartKeyGenResponse, error) {
+	err := checkKeyGenRequest(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	netParams, err := getNetwork(req.Network)
+	netParams, err := GetNetwork(req.Network)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	candidateJobID := uuid.New().String()
-	jobID, isNewJob := s.jobManager.GetOrCreateJob(req.IdempotencyKey, candidateJobID, req.WalletId)
+	jobID, isNewJob := h.jobManager.GetOrCreateJob(req.IdempotencyKey, candidateJobID, req.WalletId)
 
 	if !isNewJob {
 		return &pb.StartKeyGenResponse{JobId: jobID}, nil
 	}
 
-	go s.executeKeyGen(jobID, req.WalletId, netParams)
+	go h.executeKeyGen(jobID, req.WalletId, netParams)
 
 	return &pb.StartKeyGenResponse{JobId: jobID}, nil
 }
 
-func (s *MemoryMpcServer) GetKeyGenStatus(ctx context.Context, req *pb.GetKeyGenStatusRequest) (*pb.GetKeyGenStatusResponse, error) {
+func (h *MemoryKeyGenHandler) GetKeyGenStatus(ctx context.Context, req *pb.GetKeyGenStatusRequest) (*pb.GetKeyGenStatusResponse, error) {
 	if req.JobId == "" {
 		return nil, status.Error(codes.InvalidArgument, "jobId is required")
 	}
 
-	job, found := s.jobManager.GetJob(req.JobId)
+	job, found := h.jobManager.GetJob(req.JobId)
 	if !found {
 		return nil, status.Error(codes.NotFound, "job not found")
 	}

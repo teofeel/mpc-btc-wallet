@@ -8,7 +8,6 @@ option csharp_namespace = "WalletService.Services.MpcService";
 service WalletMpcService {
   rpc StartKeyGen (StartKeyGenRequest) returns (StartKeyGenResponse);
   rpc GetKeyGenStatus (GetKeyGenStatusRequest) returns (GetKeyGenStatusResponse);
-  //rpc Sign (SignRequest) returns (SignResponse);
 }
 
 message StartKeyGenRequest {
@@ -42,16 +41,4 @@ message GetKeyGenStatusResponse{
   string xpub = 7;
 }
 
-/*message SignRequest {
-  string wallet_id = 1;
-  bytes tx_hash = 2;
-  string derivation_path = 3;
-}
-
-message SignResponse {
-  string wallet_id = 1;
-  bytes r = 2; // ECDSA R component, 32 bytes
-  bytes s = 3; // ECDSA S component, 32 bytes
-  int32 recovery_id = 4;
-}*/
 

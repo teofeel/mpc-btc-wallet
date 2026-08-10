@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.80.0" />
+    <PackageReference Include="Grpc.Net.Client.Web" Version="2.80.0" />
     <PackageReference Include="MediatR" Version="14.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.*">
@@ -24,6 +25,9 @@
 
     <Protobuf Include="Protos\chain_state.proto" GrpcServices="Client" />
     <Protobuf Include="Protos\transaction.proto" GrpcServices="Client" />
+    <Protobuf Include="Protos\transaction_mpc.proto" GrpcServices="Client" />
+    <Protobuf Include="Protos\address.proto" GrpcServices="Client" />
+    <Protobuf Include="Protos\wallet_service.proto" GrpcServices="Client" />
   </ItemGroup>
 
 </Project>

@@ -5,6 +5,10 @@ namespace TransactionService.DTOs
 {
     public class TransactionRequestDTO
     {
+        public Guid WalletId { get; set; }
+        public string Network  { get; set; } = "Regtest";
+        public string DerivationPath { get; set; } = "";
+        
         [Required(ErrorMessage = "Receiving address is required.")]
         [StringLength(90, MinimumLength = 26, ErrorMessage = "Invalid address length.")]
         public String ReceivingAddress { get; set; } = string.Empty;

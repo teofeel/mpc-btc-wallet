@@ -95,7 +95,7 @@ func main() {
 		}
 	}
 
-	mpcServer := handlers.NewMemoryMpcServer(jobManager, router, shareStore)
+	mpcServer := handlers.NewMemoryMpcServer(jobManager, router, shareStore, 1)
 
 	lis, err := net.Listen("tcp", cfg.Server.Port)
 	if err != nil {
@@ -103,7 +103,8 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterWalletMpcServiceServer(grpcServer, mpcServer)
+	pb.RegisterWalletMpcServiceServer(grpcServer, mpcServer.KeyGenHandler)
+	pb.RegisterTransactionMpcServiceServer(grpcServer, mpcServer.TransactionHandler)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)

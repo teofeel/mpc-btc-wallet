@@ -7,14 +7,15 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"math/big"
+	"mpc/pkg/network"
+	"time"
+
 	"github.com/bnb-chain/tss-lib/v2/ecdsa/keygen"
 	"github.com/bnb-chain/tss-lib/v2/tss"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
-	"math/big"
-	"mpc/pkg/network"
-	"time"
 )
 
 type KeyGenConfig struct {
@@ -36,6 +37,7 @@ type KeyGenResult struct {
 	XPub           string
 	BitcoinAddress string
 	SaveData       *keygen.LocalPartySaveData
+	AllSaveData    map[string]*keygen.LocalPartySaveData
 }
 
 func checkErrors(ctx context.Context, cfg KeyGenConfig) error {
@@ -80,14 +82,29 @@ func RunKeyGen(ctx context.Context, cfg KeyGenConfig) (*KeyGenResult, error) {
 
 	startParties(parties, errCh)
 
-	select {
-	case saveData := <-endCh:
-		return buildResult(cfg.WalletID, saveData, cfg.Network)
-	case tssErr := <-errCh:
-		return nil, fmt.Errorf("%w", tssErr)
-	case <-ctx.Done():
-		return nil, fmt.Errorf("%w", ctx.Err())
+	allSaveData := make(map[string]*keygen.LocalPartySaveData, len(cfg.AllPartyIDs))
+	for len(allSaveData) < len(cfg.AllPartyIDs) {
+		select {
+		case saveData := <-endCh:
+			allSaveData[saveData.ShareID.String()] = saveData
+		case tssErr := <-errCh:
+			return nil, fmt.Errorf("%w", tssErr)
+		case <-ctx.Done():
+			return nil, fmt.Errorf("%w", ctx.Err())
+		}
 	}
+
+	ownSaveData := allSaveData[cfg.PartyID.KeyInt().String()]
+	if ownSaveData == nil {
+		return nil, fmt.Errorf("key gen for wallet %s: no save data for own party %s", cfg.WalletID, cfg.PartyID.Id)
+	}
+
+	result, err := buildResult(cfg.WalletID, ownSaveData, cfg.Network)
+	if err != nil {
+		return nil, err
+	}
+	result.AllSaveData = allSaveData
+	return result, nil
 }
 
 func generateAndRegisterParties(cfg KeyGenConfig, peerCtx *tss.PeerContext,

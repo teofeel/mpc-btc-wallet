@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Proto;
 using TransactionService.Controllers.Interfaces;
 using TransactionService.DTOs;
+using TransactionService.Features.Commands;
 using TransactionService.Features.Queries;
 using TransactionService.Models.Enums;
 using TransactionService.Services.Interfaces;
@@ -44,6 +45,22 @@ namespace TransactionService.Controllers
             List<TransactionResponseDTO> transactions = await _mediator.Send(new GetTransactionsByWalletIdQuery(walletId, page, pageSize), ct);
 
             return Ok(transactions);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(TransactionResponseDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateTransaction([FromBody] TransactionRequestDTO data, CancellationToken ct)
+        {
+            TransactionResponseDTO response = await _mediator.Send(new MakeTransactionCommand(data), ct);
+
+            return CreatedAtAction(
+                nameof(GetTransactionById),
+                new { id = response.Id },
+                response
+                );
         }
 
         [HttpGet("fee-estimation")]
