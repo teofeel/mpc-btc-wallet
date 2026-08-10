@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "BlockchainIndexingService/proto;proto";
+
+service ChainStateService {
+  rpc GetBlockByHash (GetBlockByHashRequest) returns (GetBlockByHashResponse);
+  rpc GetBlockByHeight (GetBlockByHeightRequest) returns (GetBlockByHeightResponse);
+  rpc GetChainStatus (GetChainStatusRequest) returns (GetChainStatusResponse);
+  rpc GetFeeEstimation (GetFeeEstimationRequest) returns (GetFeeEstimationResponse);
+}
+
+message ChainStatusResponseDto {
+  string chain = 1;
+  int64 node_height = 2;
+  int64 indexed_height = 3;
+  double sync_percentage = 4;
+  string best_block_hash = 5;
+  double verification_progress = 6;
+}
+
+message FeeEstimationResponseDto {
+  int64 target_blocks = 1;
+  double fee_rate_sat_vb = 2;
+  double fee_rate_btc_kb = 3;
+}
+
+message GetBlockByHashRequest {
+  string hash = 1;
+}
+
+message GetBlockByHashResponse {
+  bytes raw_block = 1;
+}
+
+message GetBlockByHeightRequest {
+  int64 height = 1;
+}
+
+message GetBlockByHeightResponse {
+  bytes raw_block = 1;
+}
+
+message GetChainStatusRequest {}
+
+message GetChainStatusResponse {
+  ChainStatusResponseDto status = 1;
+}
+
+message GetFeeEstimationRequest {
+  int64 target_blocks = 1;
+}
+
+message GetFeeEstimationResponse {
+  FeeEstimationResponseDto fee = 1;
+}

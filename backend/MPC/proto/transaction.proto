@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package mpc;
+
+option go_package = "gen/mpc";
+
+service TransactionMpcService{
+  rpc Sign (SignRequest) returns (SignResponse);
+}
+
+message SignRequest {
+  string wallet_id = 1;
+  string idempotency_key = 2;
+  string network = 3;
+  bytes tx_hash = 4;
+  string derivation_path=5;
+}
+
+message SignResponse {
+  string wallet_id = 1;
+  bytes signature = 2;
+  bytes r = 3; // ECDSA R component, 32 bytes
+  bytes s = 4; // ECDSA S component, 32 bytes
+  int32 recovery_id = 5; // 0 or 1
+}

@@ -1,0 +1,52 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/api/v1/wallets",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
+      "DownstreamPathTemplate": "/api/v1/wallets",
+      "DownstreamScheme": "http",
+      "ServiceName": "Wallet-Service",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/v1/wallets/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
+      "DownstreamPathTemplate": "/api/v1/wallets/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "Wallet-Service",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/v1/transactions",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
+      "DownstreamPathTemplate": "/api/v1/transactions",
+      "DownstreamScheme": "http",
+      "ServiceName": "Transaction-Service",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/v1/transactions/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
+      "DownstreamPathTemplate": "/api/v1/transactions/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "Transaction-Service",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/v1/blockchain/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete", "Patch", "Options" ],
+      "DownstreamPathTemplate": "/api/v1/blockchain/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "Blockchain-Indexing-Service",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    }
+  ],
+  "GlobalConfiguration": {
+    "ServiceDiscoveryProvider": { "Type": "Eureka" }
+  }
+}
