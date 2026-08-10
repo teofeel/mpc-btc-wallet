@@ -2,7 +2,7 @@
 
 A self-custodial Bitcoin wallet built on **multi-party computation (MPC)** - no single party ever holds a complete private key. The backend is a set of microservices that cooperate to generate keys, derive addresses, index the chain, and sign and broadcast transactions. Currently running against a Bitcoin **regtest** node for development.
 
-> ⚠️ **Status: early development.** Core backend services are functional, but the project is not feature-complete and **not intended for production use**. The frontend, deployment, and additional services are planned (see [Roadmap](#roadmap)).
+> **Status: early development.** Core backend services are functional, but the project is not feature-complete and **not intended for production use**. The frontend, deployment, and additional services are planned (see [Roadmap](#roadmap)).
 
 ![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
@@ -86,17 +86,17 @@ A self-custodial Bitcoin wallet built on **multi-party computation (MPC)** - no 
 
 | Component | Stack | Port(s) | Status |
 |---|---|---|---|
-| `ServiceRegistry` | Java 21 · Spring Boot · Netflix Eureka Server | `8761` | ✅ Implemented |
-| `ApiGateway` | .NET 8 · Ocelot · Steeltoe Eureka · JWT Bearer | `8080` | ✅ Implemented |
-| `WalletService` | .NET 8 · EF Core · MediatR · gRPC | `8081` (REST), `50053` (gRPC) | ✅ Implemented |
+| `ServiceRegistry` | Java 21 · Spring Boot · Netflix Eureka Server | `8761` | Implemented |
+| `ApiGateway` | .NET 8 · Ocelot · Steeltoe Eureka · JWT Bearer | `8080` | Implemented |
+| `WalletService` | .NET 8 · EF Core · MediatR · gRPC | `8081` (REST), `50053` (gRPC) | Implemented |
 | `TransactionService` | .NET 8 · EF Core · NBitcoin · gRPC | `8082` | ✅ Implemented |
-| `BlockchainIndexingService` | Go · btcd · chi · pgx · gRPC | `8083` (REST), `50052` (gRPC) | ✅ Implemented |
-| `MPC` | Go · bnb-chain/tss-lib v2 · gRPC | `50051` | ✅ Implemented |
-| `Frontend` | Angular 21 · TypeScript | `4200` | 🚧 In progress (scaffold) |
-| `PostgreSQL` | Postgres 16 (docker) | `5433` (host) | ✅ Provisioned |
-| `Kafka / Schema Registry / AKHQ` | Confluent 7.6 (docker) | `9092` / `3000` / `3001` | 🚧 Provisioned, integration planned |
-| `UserService` | .NET 8 · EF Core · Kafka | - | 🚧 Planned |
-| `NotificationService` | .NET 8 · Kafka | - | 🚧 Planned |
+| `BlockchainIndexingService` | Go · btcd · chi · pgx · gRPC | `8083` (REST), `50052` (gRPC) | Implemented |
+| `MPC` | Go · bnb-chain/tss-lib v2 · gRPC | `50051` | Implemented |
+| `Frontend` | Angular 21 · TypeScript | `4200` | In progress (scaffold) |
+| `PostgreSQL` | Postgres 16 (docker) | `5433` (host) | Provisioned |
+| `Kafka / Schema Registry / AKHQ` | Confluent 7.6 (docker) | `9092` / `3000` / `3001` | Provisioned, integration planned |
+| `UserService` | .NET 8 · EF Core · Kafka | - | Planned |
+| `NotificationService` | .NET 8 · Kafka | - | Planned |
 
 <!-- TODO: add rows here as new services are implemented; update statuses as work lands -->
 
@@ -358,8 +358,8 @@ The sections below are placeholders for upcoming work — they will be filled in
 
 | Service | Stack | Purpose | Status |
 |---|---|---|---|
-| `UserService` | .NET 8 · EF Core · PostgreSQL | user accounts, profiles, auth data | 🚧 Planned |
-| `NotificationService` | .NET 8 · Kafka | event-driven notifications (email / push) | 🚧 Planned |
+| `UserService` | .NET 8 · EF Core · PostgreSQL | user accounts, profiles, auth data | Planned |
+| `NotificationService` | .NET 8 · Kafka | event-driven notifications (email / push) | Planned |
 | _(more to come)_ | — | — | — |
 
 ### Deployment
