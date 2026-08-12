@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"mpc/cmd/server"
 	"net"
 	"os"
 	"os/signal"
 
 	"google.golang.org/grpc"
 
-	"mpc/cmd/handlers"
 	pb "mpc/gen/mpc"
 	"mpc/pkg/cron"
 	"mpc/pkg/dkg"
@@ -95,7 +95,7 @@ func main() {
 		}
 	}
 
-	mpcServer := handlers.NewMemoryMpcServer(jobManager, router, shareStore, 1)
+	mpcServer := server.NewMemoryMpcServer(jobManager, router, shareStore, 1)
 
 	lis, err := net.Listen("tcp", cfg.Server.Port)
 	if err != nil {
