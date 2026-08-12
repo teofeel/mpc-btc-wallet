@@ -2,7 +2,7 @@ package server
 
 import (
 	"math/big"
-	"mpc/cmd/handlers"
+	"mpc/internal/handlers"
 	"mpc/pkg/dkg"
 	"mpc/pkg/network"
 	signer2 "mpc/pkg/signer"

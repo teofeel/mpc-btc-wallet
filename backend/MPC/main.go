@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"mpc/cmd/server"
+	"mpc/internal/server"
 	"net"
 	"os"
 	"os/signal"
