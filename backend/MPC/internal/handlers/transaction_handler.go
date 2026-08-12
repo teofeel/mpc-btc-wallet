@@ -7,6 +7,7 @@ import (
 	"mpc/pkg/network"
 	"mpc/pkg/signer"
 	"mpc/pkg/storage"
+	"mpc/pkg/utils"
 	"time"
 
 	"github.com/bnb-chain/tss-lib/v2/tss"
@@ -61,7 +62,7 @@ func (h *MemoryTransactionHandler) Sign(ctx context.Context, req *pb.SignRequest
 		return nil, err
 	}
 
-	if _, err := GetNetwork(req.Network); err != nil {
+	if _, err := utils.GetNetwork(req.Network); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

@@ -7,6 +7,7 @@ import (
 	"mpc/pkg/dkg"
 	"mpc/pkg/network"
 	"mpc/pkg/storage"
+	"mpc/pkg/utils"
 	"sync"
 	"time"
 
@@ -152,7 +153,7 @@ func (h *MemoryKeyGenHandler) StartKeyGen(ctx context.Context, req *pb.StartKeyG
 		return nil, err
 	}
 
-	netParams, err := GetNetwork(req.Network)
+	netParams, err := utils.GetNetwork(req.Network)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
