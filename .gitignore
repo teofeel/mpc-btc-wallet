@@ -90,3 +90,5 @@ yarn-error.log*
 
 kms_config.json
 backend/MPC/data/shares/*
+
+backend/**/Migrations/*

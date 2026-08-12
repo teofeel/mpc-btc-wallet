@@ -55,7 +55,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddGrpc();
 builder.Services.AddGrpcClient<WalletMpcService.WalletMpcServiceClient>(options =>
 {
-    options.Address = new Uri(builder.Configuration["MpcService:Address"] ?? "http://localhost:50051");
+    options.Address = new Uri(builder.Configuration["MpcService:Address"] ?? "http://127.0.0.1:50051");
 });
 
 // MPC completion queue + background services
