@@ -89,7 +89,7 @@ A self-custodial Bitcoin wallet built on **multi-party computation (MPC)** - no 
 | `ServiceRegistry` | Java 21 · Spring Boot · Netflix Eureka Server | `8761` | Implemented |
 | `ApiGateway` | .NET 8 · Ocelot · Steeltoe Eureka · JWT Bearer | `8080` | Implemented |
 | `WalletService` | .NET 8 · EF Core · MediatR · gRPC | `8081` (REST), `50053` (gRPC) | Implemented |
-| `TransactionService` | .NET 8 · EF Core · NBitcoin · gRPC | `8082` | ✅ Implemented |
+| `TransactionService` | .NET 8 · EF Core · NBitcoin · gRPC | `8082` | Implemented |
 | `BlockchainIndexingService` | Go · btcd · chi · pgx · gRPC | `8083` (REST), `50052` (gRPC) | Implemented |
 | `MPC` | Go · bnb-chain/tss-lib v2 · gRPC | `50051` | Implemented |
 | `Frontend` | Angular 21 · TypeScript | `4200` | In progress (scaffold) |
