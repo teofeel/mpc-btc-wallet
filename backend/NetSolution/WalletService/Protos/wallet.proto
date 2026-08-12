@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package mpc;
+
+option go_package = "gen/mpc";
+option csharp_namespace = "WalletService.Services.MpcService";
+
+service WalletMpcService {
+  rpc StartKeyGen (StartKeyGenRequest) returns (StartKeyGenResponse);
+  rpc GetKeyGenStatus (GetKeyGenStatusRequest) returns (GetKeyGenStatusResponse);
+}
+
+message StartKeyGenRequest {
+  string wallet_id = 1;
+  string idempotency_key = 2;
+  string network = 3;
+}
+
+message StartKeyGenResponse {
+  string job_id = 1;
+}
+
+message GetKeyGenStatusRequest {
+  string job_id = 1;
+}
+
+message GetKeyGenStatusResponse{
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    IN_PROGRESS = 1;
+    COMPLETED = 2;
+    FAILED = 3;
+  }
+
+  Status status = 1;
+  string wallet_id = 2;
+  string public_key_hex = 3;
+  string bitcoin_address = 4;
+  string error_message = 5;
+  string chain_code_hex = 6;
+  string xpub = 7;
+}
+
+
