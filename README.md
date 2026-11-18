@@ -1,6 +1,6 @@
 # Bitcoin Wallet
 
-A self-custodial Bitcoin wallet built on **multi-party computation (MPC)** - no single party ever holds a complete private key. The backend is a set of microservices that cooperate to generate keys, derive addresses, index the chain, and sign and broadcast transactions. Currently running against a Bitcoin **regtest** node for development.
+A custodial Bitcoin wallet built on **multi-party computation (MPC)** - no single party ever holds a complete private key. The backend is a set of microservices that cooperate to generate keys, derive addresses, index the chain, and sign and broadcast transactions. Currently running against a Bitcoin **regtest** node for development.
 
 > **Status: early development.** Core backend services are functional, but the project is not feature-complete and **not intended for production use**. The frontend, deployment, and additional services are planned (see [Roadmap](#roadmap)).
 
